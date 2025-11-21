@@ -23,7 +23,7 @@ public class BoosterManager {
 
     public boolean activateBooster(BoosterType type, Player activator, int durationMinutes) {
         if (isBoosterActive(type)) {
-            activator.sendMessage(plugin.getMessagesManager().getMessage("booster.already-active"));
+            plugin.getMessagesManager().sendMessage(activator, plugin.getMessagesManager().getMessage("booster.already-active"));
             return false;
         }
 
@@ -31,7 +31,7 @@ public class BoosterManager {
         if (maxActive != -1 && activeBoosters.size() >= maxActive) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("%max%", String.valueOf(maxActive));
-            activator.sendMessage(plugin.getMessagesManager().getMessage("booster.max-active-reached", placeholders));
+            plugin.getMessagesManager().sendMessage(activator, plugin.getMessagesManager().getMessage("booster.max-active-reached", placeholders));
             return false;
         }
 
@@ -248,7 +248,7 @@ public class BoosterManager {
 
         String messageKey = scheduled ? "booster.activated-scheduled" : "booster.activated";
         String message = plugin.getMessagesManager().getMessage(messageKey, placeholders);
-        Bukkit.broadcastMessage(message);
+        plugin.getMessagesManager().sendBroadCastMessage(message);
     }
 
     private void announceBoosterDeactivation(BoosterType type) {
@@ -257,7 +257,7 @@ public class BoosterManager {
         placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(type));
 
         String message = plugin.getMessagesManager().getMessage("booster.expired", placeholders);
-        Bukkit.broadcastMessage(message);
+        plugin.getMessagesManager().sendBroadCastMessage(message);
     }
 
     private void playGlobalSound(Sound sound, float volume, float pitch) {

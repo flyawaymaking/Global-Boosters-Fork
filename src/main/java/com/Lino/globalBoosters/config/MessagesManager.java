@@ -2,12 +2,14 @@ package com.Lino.globalBoosters.config;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
-import com.Lino.globalBoosters.utils.GradientColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
 public class MessagesManager {
@@ -15,6 +17,7 @@ public class MessagesManager {
     private final GlobalBoosters plugin;
     private final File messagesFile;
     private FileConfiguration messagesConfig;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public MessagesManager(GlobalBoosters plugin) {
         this.plugin = plugin;
@@ -34,28 +37,36 @@ public class MessagesManager {
     }
 
     public String getMessage(String key) {
-        String message = messagesConfig.getString(key);
-        if (message == null) {
-            return GradientColor.apply("<gradient:#FF0000:#FF6B6B>Message not found: " + key + "</gradient>");
-        }
-        return GradientColor.apply(message);
+        return getMessage(key, null);
     }
 
     public String getMessage(String key, Map<String, String> placeholders) {
         String message = messagesConfig.getString(key);
         if (message == null) {
-            return GradientColor.apply("<gradient:#FF0000:#FF6B6B>Message not found: " + key + "</gradient>");
+            return "<gradient:#FF0000:#FF6B6B>Message not found: " + key + "</gradient>";
+        }
+        if (placeholders != null) {
+            for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+                String value = entry.getValue();
+                // Strip any existing color codes from the value
+                value = stripColorCodes(value);
+                message = message.replace(entry.getKey(), value);
+            }
         }
 
-        // Replace placeholders BEFORE applying gradient
-        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-            String value = entry.getValue();
-            // Strip any existing color codes from the value
-            value = stripColorCodes(value);
-            message = message.replace(entry.getKey(), value);
-        }
+        return message;
+    }
 
-        return GradientColor.apply(message);
+    public Component getMessageComponent(String key, Map<String, String> placeholders) {
+        return miniMessage.deserialize(getMessage(key, placeholders));
+    }
+
+    public void sendMessage(CommandSender sender, String message) {
+        sender.sendMessage(miniMessage.deserialize(message));
+    }
+
+    public void sendBroadCastMessage(String message) {
+        Bukkit.broadcast(miniMessage.deserialize(message));
     }
 
     public String getPrefix() {
@@ -89,7 +100,6 @@ public class MessagesManager {
 
     private String stripColorCodes(String text) {
         if (text == null) return "";
-        // Remove Minecraft color codes
         return text.replaceAll("§[0-9a-fk-orx]", "");
     }
 }

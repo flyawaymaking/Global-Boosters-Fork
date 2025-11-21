@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.Lino.globalBoosters.GlobalBoosters'
+version = 'v3.3.1'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven { url = 'https://repo.nightexpressdev.com/releases'}
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io/"
+    }
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT'
+    compileOnly 'su.nightexpress.coinsengine:CoinsEngine:2.5.0'
+    compileOnly 'com.github.MilkBowl:VaultAPI:1.7.1'
+}
+
+tasks.jar {
+    archiveBaseName.set("GlobalBoosters")
+}

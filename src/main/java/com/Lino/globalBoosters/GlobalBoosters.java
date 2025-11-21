@@ -211,7 +211,7 @@ public class GlobalBoosters extends JavaPlugin {
             return false;
         }
         economy = rsp.getProvider();
-        return economy != null;
+        return true;
     }
 
     public static GlobalBoosters getInstance() {

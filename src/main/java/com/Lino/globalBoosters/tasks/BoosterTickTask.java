@@ -2,7 +2,6 @@ package com.Lino.globalBoosters.tasks;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.ActiveBooster;
-import com.Lino.globalBoosters.boosters.BoosterType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class BoosterTickTask extends BukkitRunnable {

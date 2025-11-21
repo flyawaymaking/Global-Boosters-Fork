@@ -1,5 +1,7 @@
 package com.Lino.globalBoosters.utils;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -9,11 +11,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemBuilder {
 
     private final ItemStack itemStack;
     private final ItemMeta itemMeta;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public ItemBuilder(Material material) {
         this.itemStack = new ItemStack(material);
@@ -32,14 +36,17 @@ public class ItemBuilder {
 
     public ItemBuilder setDisplayName(String displayName) {
         if (itemMeta != null) {
-            itemMeta.setDisplayName(displayName);
+            itemMeta.displayName(miniMessage.deserialize(displayName));
         }
         return this;
     }
 
     public ItemBuilder setLore(List<String> lore) {
         if (itemMeta != null) {
-            itemMeta.setLore(lore);
+            List<Component> components = lore.stream()
+                    .map(line -> MiniMessage.miniMessage().deserialize(line))
+                    .collect(Collectors.toList());
+            itemMeta.lore(components);
         }
         return this;
     }
@@ -50,12 +57,12 @@ public class ItemBuilder {
 
     public ItemBuilder addLoreLine(String line) {
         if (itemMeta != null) {
-            List<String> lore = itemMeta.getLore();
+            List<Component> lore = itemMeta.lore();
             if (lore == null) {
                 lore = new ArrayList<>();
             }
-            lore.add(line);
-            itemMeta.setLore(lore);
+            lore.add(miniMessage.deserialize(line));
+            itemMeta.lore(lore);
         }
         return this;
     }

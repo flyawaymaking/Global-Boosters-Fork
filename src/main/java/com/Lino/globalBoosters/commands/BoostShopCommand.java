@@ -21,20 +21,18 @@ public class BoostShopCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.player-only"));
+        if (!(sender instanceof Player player)) {
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.player-only"));
             return true;
         }
 
-        Player player = (Player) sender;
-
         if (!player.hasPermission("globalboosters.shop")) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
         if (!plugin.getConfigManager().isShopGuiEnabled()) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("shop.disabled"));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("shop.disabled"));
             return true;
         }
 

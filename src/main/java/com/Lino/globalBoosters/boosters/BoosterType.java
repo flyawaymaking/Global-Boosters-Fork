@@ -60,18 +60,9 @@ public enum BoosterType {
     }
 
     public boolean isNegativeEffect() {
-        switch (this) {
-            case SLOWNESS:
-            case MINING_FATIGUE:
-            case WEAKNESS:
-            case POISON:
-            case WITHER:
-            case BLINDNESS:
-            case HUNGER:
-            case NAUSEA:
-                return true;
-            default:
-                return false;
-        }
+        return switch (this) {
+            case SLOWNESS, MINING_FATIGUE, WEAKNESS, POISON, WITHER, BLINDNESS, HUNGER, NAUSEA -> true;
+            default -> false;
+        };
     }
 }

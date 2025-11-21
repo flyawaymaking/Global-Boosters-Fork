@@ -60,13 +60,13 @@ public class BoosterItemListener implements Listener {
         float volume = (float) plugin.getConfigManager().getSoundVolume();
 
         if (!plugin.getConfigManager().isBoosterEnabled(type)) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("booster.disabled"));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("booster.disabled"));
             if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
             return;
         }
 
         if (!player.hasPermission("globalboosters.use")) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission-use"));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("general.no-permission-use"));
             return;
         }
 
@@ -74,13 +74,13 @@ public class BoosterItemListener implements Listener {
         if (!player.hasPermission(boosterPermission) && !player.hasPermission("globalboosters.use.*")) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(type));
-            player.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission-booster", placeholders));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("general.no-permission-booster", placeholders));
             if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
             return;
         }
 
         if (plugin.getBoosterManager().isBoosterActive(type)) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("booster.already-active"));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("booster.already-active"));
             if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
             return;
         }
@@ -89,7 +89,7 @@ public class BoosterItemListener implements Listener {
         if (maxActive != -1 && plugin.getBoosterManager().getActiveBoosterCount() >= maxActive) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("%max%", String.valueOf(maxActive));
-            player.sendMessage(plugin.getMessagesManager().getMessage("booster.max-active-reached", placeholders));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("booster.max-active-reached", placeholders));
             if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
             return;
         }
@@ -104,16 +104,14 @@ public class BoosterItemListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
-
-        Player player = (Player) event.getWhoClicked();
 
         ItemStack clickedItem = event.getCurrentItem();
         ItemStack cursorItem = event.getCursor();
 
-        if (clickedItem != null && BoosterItem.isBoosterItem(clickedItem)) {
+        if (BoosterItem.isBoosterItem(clickedItem)) {
             if (event.getSlotType() == InventoryType.SlotType.ARMOR ||
                     event.getSlotType() == InventoryType.SlotType.QUICKBAR && event.getSlot() == 40) {
                 event.setCancelled(true);
@@ -121,7 +119,7 @@ public class BoosterItemListener implements Listener {
             }
         }
 
-        if (cursorItem != null && BoosterItem.isBoosterItem(cursorItem)) {
+        if (BoosterItem.isBoosterItem(cursorItem)) {
             if (event.getSlotType() == InventoryType.SlotType.ARMOR ||
                     event.getSlotType() == InventoryType.SlotType.QUICKBAR && event.getSlot() == 40) {
                 event.setCancelled(true);
@@ -143,7 +141,7 @@ public class BoosterItemListener implements Listener {
             }
         }
 
-        if (event.isShiftClick() && clickedItem != null && BoosterItem.isBoosterItem(clickedItem)) {
+        if (event.isShiftClick() && BoosterItem.isBoosterItem(clickedItem)) {
             InventoryType topType = player.getOpenInventory().getTopInventory().getType();
             if (topType != InventoryType.PLAYER && topType != InventoryType.CREATIVE &&
                     topType != InventoryType.CHEST && topType != InventoryType.ENDER_CHEST &&
@@ -182,8 +180,7 @@ public class BoosterItemListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getPlayer() instanceof Player) {
-            Player player = (Player) event.getPlayer();
+        if (event.getPlayer() instanceof Player player) {
             shopGUIs.remove(player);
             confirmGUIs.remove(player);
         }

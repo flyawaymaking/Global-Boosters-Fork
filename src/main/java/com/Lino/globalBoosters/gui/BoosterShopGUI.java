@@ -39,7 +39,7 @@ public class BoosterShopGUI {
     public BoosterShopGUI(GlobalBoosters plugin, Player player) {
         this.plugin = plugin;
         this.player = player;
-        this.inventory = Bukkit.createInventory(null, 54, plugin.getMessagesManager().getMessage("shop.title"));
+        this.inventory = Bukkit.createInventory(null, 54, plugin.getMessagesManager().getMessageComponent("shop.title", null));
         this.slotToBooster = new HashMap<>();
 
         setupGUI();
@@ -134,14 +134,10 @@ public class BoosterShopGUI {
     }
 
     private boolean isNoMultiplierBooster(BoosterType type) {
-        switch (type) {
-            case NO_FALL_DAMAGE:
-            case KEEP_INVENTORY:
-            case FLY:
-                return true;
-            default:
-                return false;
-        }
+        return switch (type) {
+            case NO_FALL_DAMAGE, KEEP_INVENTORY, FLY -> true;
+            default -> false;
+        };
     }
 
     public void open() {
@@ -167,7 +163,7 @@ public class BoosterShopGUI {
             if (!plugin.getSupplyManager().canPurchase(type)) {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(type));
-                player.sendMessage(plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders));
+                plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders));
                 if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
                 return;
             }
@@ -177,7 +173,7 @@ public class BoosterShopGUI {
         if (!plugin.getEconomy().has(player, price)) {
             Map<String, String> placeholders = new HashMap<>();
             placeholders.put("%price%", String.format("%.2f", price));
-            player.sendMessage(plugin.getMessagesManager().getMessage("purchase.not-enough-money", placeholders));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money", placeholders));
             if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
             return;
         }

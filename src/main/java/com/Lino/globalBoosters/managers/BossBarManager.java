@@ -3,9 +3,7 @@ package com.Lino.globalBoosters.managers;
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.ActiveBooster;
 import com.Lino.globalBoosters.boosters.BoosterType;
-import com.Lino.globalBoosters.utils.GradientColor;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -119,14 +117,10 @@ public class BossBarManager {
     }
 
     private boolean isNoMultiplierBooster(BoosterType type) {
-        switch (type) {
-            case NO_FALL_DAMAGE:
-            case KEEP_INVENTORY:
-            case FLY:
-                return true;
-            default:
-                return false;
-        }
+        return switch (type) {
+            case NO_FALL_DAMAGE, KEEP_INVENTORY, FLY -> true;
+            default -> false;
+        };
     }
 
     private BarColor getBarColor(BoosterType type) {
@@ -134,23 +128,14 @@ public class BossBarManager {
             return BarColor.RED;
         }
 
-        switch (type) {
-            case PLANT_GROWTH:
-            case FARMING_FORTUNE:
-                return BarColor.GREEN;
-            case SPAWNER_RATE:
-            case MOB_DROP:
-                return BarColor.RED;
-            case EXP_MULTIPLIER:
-                return BarColor.YELLOW;
-            case MINING_SPEED:
-                return BarColor.BLUE;
-            case FISHING_LUCK:
-                return BarColor.WHITE;
-            case COMBAT_DAMAGE:
-                return BarColor.PURPLE;
-            default:
-                return BarColor.PINK;
-        }
+        return switch (type) {
+            case PLANT_GROWTH, FARMING_FORTUNE -> BarColor.GREEN;
+            case SPAWNER_RATE, MOB_DROP -> BarColor.RED;
+            case EXP_MULTIPLIER -> BarColor.YELLOW;
+            case MINING_SPEED -> BarColor.BLUE;
+            case FISHING_LUCK -> BarColor.WHITE;
+            case COMBAT_DAMAGE -> BarColor.PURPLE;
+            default -> BarColor.PINK;
+        };
     }
 }

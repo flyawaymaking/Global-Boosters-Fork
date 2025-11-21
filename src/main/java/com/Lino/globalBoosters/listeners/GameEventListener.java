@@ -62,8 +62,7 @@ public class GameEventListener implements Listener {
                 Block block = event.getBlock();
                 BlockData data = block.getBlockData();
 
-                if (data instanceof Ageable) {
-                    Ageable ageable = (Ageable) data;
+                if (data instanceof Ageable ageable) {
                     int currentAge = ageable.getAge();
                     int maxAge = ageable.getMaximumAge();
 
@@ -110,8 +109,7 @@ public class GameEventListener implements Listener {
                             Location newLocation = spawnLocation.clone().add(offsetX, 0, offsetZ);
 
                             Entity newEntity = spawnLocation.getWorld().spawnEntity(newLocation, entityType);
-                            if (newEntity instanceof LivingEntity) {
-                                LivingEntity newLiving = (LivingEntity) newEntity;
+                            if (newEntity instanceof LivingEntity newLiving) {
                                 newLiving.setMetadata("spawner_boosted", new FixedMetadataValue(plugin, true));
                             }
                         }
@@ -163,8 +161,7 @@ public class GameEventListener implements Listener {
                 double multiplier = plugin.getConfigManager().getBoosterMultiplier(BoosterType.FISHING_LUCK);
 
                 Entity caught = event.getCaught();
-                if (caught instanceof org.bukkit.entity.Item) {
-                    org.bukkit.entity.Item item = (org.bukkit.entity.Item) caught;
+                if (caught instanceof org.bukkit.entity.Item item) {
                     ItemStack stack = item.getItemStack();
                     int newAmount = (int) (stack.getAmount() * multiplier);
                     stack.setAmount(newAmount);
@@ -227,8 +224,7 @@ public class GameEventListener implements Listener {
                 blockType == Material.BEETROOTS) {
 
             BlockData data = block.getBlockData();
-            if (data instanceof Ageable) {
-                Ageable ageable = (Ageable) data;
+            if (data instanceof Ageable ageable) {
                 if (ageable.getAge() == ageable.getMaximumAge()) {
                     spawnBonusCrop(player, blockType);
                 }
@@ -345,11 +341,9 @@ public class GameEventListener implements Listener {
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
-
-        Player player = (Player) event.getEntity();
 
         if (plugin.getBoosterManager().isBoosterActive(BoosterType.HUNGER_SAVER)) {
             ActiveBooster booster = plugin.getBoosterManager().getActiveBooster(BoosterType.HUNGER_SAVER);

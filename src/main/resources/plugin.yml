@@ -1,8 +1,8 @@
 name: GlobalBoosters
-version: '3.3'
+version: '3.3.1'
 main: com.Lino.globalBoosters.GlobalBoosters
 api-version: '1.21'
-softdepend: [Vault]
+softdepend: [Vault, CoinsEngine]
 author: Lino
 description: A comprehensive global boosters plugin for Minecraft servers
 

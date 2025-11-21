@@ -2,7 +2,6 @@ package com.Lino.globalBoosters.tasks;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
-import com.Lino.globalBoosters.config.ConfigManager;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -101,6 +100,6 @@ public class RandomScheduledBoosterTask extends BukkitRunnable {
         placeholders.put("%duration%", String.valueOf(duration));
 
         String message = plugin.getMessagesManager().getMessage("booster.activated-random", placeholders);
-        org.bukkit.Bukkit.broadcastMessage(message);
+        plugin.getMessagesManager().sendBroadCastMessage(message);
     }
 }

@@ -60,7 +60,6 @@ public class SupplyManager {
                     purchaseCounts.put(type, rs.getInt("purchase_count"));
                     lastResetTime.put(type, rs.getLong("last_reset"));
                 } catch (IllegalArgumentException e) {
-                    continue;
                 }
             }
         } catch (SQLException e) {
@@ -179,7 +178,7 @@ public class SupplyManager {
 
     private void announceRestock() {
         String message = plugin.getMessagesManager().getMessage("supply.restocked");
-        Bukkit.broadcastMessage(message);
+        plugin.getMessagesManager().sendBroadCastMessage(message);
 
         float volume = (float) plugin.getConfigManager().getSoundVolume();
         if (volume <= 0) return;

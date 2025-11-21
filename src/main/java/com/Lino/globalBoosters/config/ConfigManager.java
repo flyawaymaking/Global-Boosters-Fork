@@ -246,15 +246,10 @@ public class ConfigManager {
     }
 
     private boolean isNoMultiplierBooster(BoosterType type) {
-        switch (type) {
-            case NO_FALL_DAMAGE:
-            case KEEP_INVENTORY:
-            case FLY:
-            case PLANT_GROWTH:
-                return true;
-            default:
-                return false;
-        }
+        return switch (type) {
+            case NO_FALL_DAMAGE, KEEP_INVENTORY, FLY, PLANT_GROWTH -> true;
+            default -> false;
+        };
     }
 
     public void reload() {
@@ -268,55 +263,25 @@ public class ConfigManager {
     }
 
     private double getDefaultPrice(BoosterType type) {
-        switch (type) {
-            case PLANT_GROWTH:
-                return 500.0;
-            case SPAWNER_RATE:
-                return 1500.0;
-            case EXP_MULTIPLIER:
-                return 1000.0;
-            case MOB_DROP:
-                return 1200.0;
-            case MINING_SPEED:
-                return 800.0;
-            case FISHING_LUCK:
-                return 600.0;
-            case FARMING_FORTUNE:
-                return 700.0;
-            case COMBAT_DAMAGE:
-                return 2000.0;
-            case HASTE:
-            case RESISTANCE:
-            case JUMP_BOOST:
-            case REGENERATION:
-            case NIGHT_VISION:
-            case FIRE_RESISTANCE:
-            case SPEED:
-            case STRENGTH:
-                return 1000.0;
-            case NO_FALL_DAMAGE:
-                return 800.0;
-            case HUNGER_SAVER:
-                return 600.0;
-            case ARMOR_DURABILITY:
-                return 1200.0;
-            case KEEP_INVENTORY:
-                return 3000.0;
-            case FLY:
-                return 2500.0;
-            case SLOWNESS:
-            case MINING_FATIGUE:
-            case WEAKNESS:
-            case POISON:
-            case BLINDNESS:
-            case HUNGER:
-            case NAUSEA:
-                return 100.0;
-            case WITHER:
-                return 150.0;
-            default:
-                return 1000.0;
-        }
+        return switch (type) {
+            case PLANT_GROWTH -> 500.0;
+            case SPAWNER_RATE -> 1500.0;
+            case EXP_MULTIPLIER -> 1000.0;
+            case MOB_DROP -> 1200.0;
+            case MINING_SPEED -> 800.0;
+            case FISHING_LUCK -> 600.0;
+            case FARMING_FORTUNE -> 700.0;
+            case COMBAT_DAMAGE -> 2000.0;
+            case HASTE, RESISTANCE, JUMP_BOOST, REGENERATION, NIGHT_VISION, FIRE_RESISTANCE, SPEED, STRENGTH -> 1000.0;
+            case NO_FALL_DAMAGE -> 800.0;
+            case HUNGER_SAVER -> 600.0;
+            case ARMOR_DURABILITY -> 1200.0;
+            case KEEP_INVENTORY -> 3000.0;
+            case FLY -> 2500.0;
+            case SLOWNESS, MINING_FATIGUE, WEAKNESS, POISON, BLINDNESS, HUNGER, NAUSEA -> 100.0;
+            case WITHER -> 150.0;
+            default -> 1000.0;
+        };
     }
 
     public static class ScheduledBooster {

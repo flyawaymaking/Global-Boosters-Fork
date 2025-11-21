@@ -29,7 +29,7 @@ public class ConfirmPurchaseGUI {
         this.player = player;
         this.boosterType = boosterType;
         this.price = price;
-        this.inventory = Bukkit.createInventory(null, 27, plugin.getMessagesManager().getMessage("shop.confirm-title"));
+        this.inventory = Bukkit.createInventory(null, 27, plugin.getMessagesManager().getMessageComponent("shop.confirm-title", null));
 
         setupGUI();
     }
@@ -106,7 +106,7 @@ public class ConfirmPurchaseGUI {
         float volume = (float) plugin.getConfigManager().getSoundVolume();
 
         if (!plugin.getEconomy().has(player, price)) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("purchase.not-enough-money",
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money",
                     new HashMap<String, String>() {{
                         put("%price%", String.format("%.2f", price));
                     }}));
@@ -119,7 +119,7 @@ public class ConfirmPurchaseGUI {
             if (!plugin.getSupplyManager().canPurchase(boosterType)) {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(boosterType));
-                player.sendMessage(plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders));
+                plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders));
                 if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
                 player.closeInventory();
                 return;
@@ -132,7 +132,7 @@ public class ConfirmPurchaseGUI {
                 plugin.getEconomy().depositPlayer(player, price);
                 Map<String, String> placeholders2 = new HashMap<>();
                 placeholders2.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(boosterType));
-                player.sendMessage(plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders2));
+                plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders2));
                 if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
                 player.closeInventory();
                 return;
@@ -145,7 +145,7 @@ public class ConfirmPurchaseGUI {
         );
         if (player.getInventory().firstEmpty() == -1) {
             player.getWorld().dropItem(player.getLocation(), boosterItem);
-            player.sendMessage(plugin.getMessagesManager().getMessage("purchase.inventory-full"));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.inventory-full"));
         } else {
             player.getInventory().addItem(boosterItem);
         }
@@ -153,7 +153,7 @@ public class ConfirmPurchaseGUI {
         Map<String, String> placeholders3 = new HashMap<>();
         placeholders3.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(boosterType));
         placeholders3.put("%price%", String.format("%.2f", price));
-        player.sendMessage(plugin.getMessagesManager().getMessage("purchase.success", placeholders3));
+        plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.success", placeholders3));
         if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, volume, 1.0f);
         player.closeInventory();
 

@@ -59,14 +59,10 @@ public class BoosterItem {
     }
 
     private static boolean isNoMultiplierBooster(BoosterType type) {
-        switch (type) {
-            case NO_FALL_DAMAGE:
-            case KEEP_INVENTORY:
-            case FLY:
-                return true;
-            default:
-                return false;
-        }
+        return switch (type) {
+            case NO_FALL_DAMAGE, KEEP_INVENTORY, FLY -> true;
+            default -> false;
+        };
     }
 
     public static boolean isBoosterItem(ItemStack item) {

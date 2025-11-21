@@ -5,7 +5,6 @@ import com.Lino.globalBoosters.boosters.BoosterType;
 import com.Lino.globalBoosters.config.ConfigManager;
 import com.Lino.globalBoosters.items.BoosterItem;
 import com.Lino.globalBoosters.gui.BoosterShopGUI;
-import com.Lino.globalBoosters.utils.GradientColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -40,43 +39,36 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
         String subCommand = args[0].toLowerCase();
 
-        switch (subCommand) {
-            case "give":
-                return handleGive(sender, args);
-            case "start":
-                return handleStart(sender, args);
-            case "stop":
-                return handleStop(sender, args);
-            case "reload":
-                return handleReload(sender);
-            case "stats":
-                return handleStats(sender);
-            case "shop":
-                return handleShop(sender);
-            case "schedule":
-                return handleSchedule(sender);
-            case "random":
-                return handleRandom(sender);
-            default:
+        return switch (subCommand) {
+            case "give" -> handleGive(sender, args);
+            case "start" -> handleStart(sender, args);
+            case "stop" -> handleStop(sender, args);
+            case "reload" -> handleReload(sender);
+            case "stats" -> handleStats(sender);
+            case "shop" -> handleShop(sender);
+            case "schedule" -> handleSchedule(sender);
+            case "random" -> handleRandom(sender);
+            default -> {
                 sendHelp(sender);
-                return true;
-        }
+                yield true;
+            }
+        };
     }
 
     private boolean handleGive(CommandSender sender, String[] args) {
         if (!sender.hasPermission("globalboosters.admin.give")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
         if (args.length < 3) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.usage-give"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.usage-give"));
             return true;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.player-not-found"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.player-not-found"));
             return true;
         }
 
@@ -84,17 +76,17 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         try {
             type = BoosterType.valueOf(args[2].toUpperCase());
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.invalid-booster"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.invalid-booster"));
             for (BoosterType boosterType : BoosterType.values()) {
                 if (plugin.getConfigManager().isBoosterEnabled(boosterType)) {
-                    sender.sendMessage(GradientColor.apply("<gradient:#808080:#A9A9A9>- </gradient><gradient:#FFA500:#FFD700>" + boosterType.name().toLowerCase() + "</gradient>"));
+                    plugin.getMessagesManager().sendMessage(sender, "<gradient:#808080:#A9A9A9>- </gradient><gradient:#FFA500:#FFD700>" + boosterType.name().toLowerCase() + "</gradient>");
                 }
             }
             return true;
         }
 
         if (!plugin.getConfigManager().isBoosterEnabled(type)) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("booster.disabled"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("booster.disabled"));
             return true;
         }
 
@@ -103,11 +95,11 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             try {
                 duration = Integer.parseInt(args[3]);
                 if (duration <= 0) {
-                    sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.duration-positive"));
+                    plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.duration-positive"));
                     return true;
                 }
             } catch (NumberFormatException e) {
-                sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.invalid-duration"));
+                plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.invalid-duration"));
                 return true;
             }
         }
@@ -116,7 +108,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
         if (target.getInventory().firstEmpty() == -1) {
             target.getWorld().dropItem(target.getLocation(), boosterItem);
-            target.sendMessage(plugin.getMessagesManager().getMessage("purchase.inventory-full"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("purchase.inventory-full"));
         } else {
             target.getInventory().addItem(boosterItem);
         }
@@ -126,20 +118,20 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         placeholders.put("%player%", target.getName());
         placeholders.put("%duration%", String.valueOf(duration));
 
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.gave-booster", placeholders));
-        target.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.received-booster", placeholders));
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.gave-booster", placeholders));
+        plugin.getMessagesManager().sendMessage(target, plugin.getMessagesManager().getMessage("commands.booster.received-booster", placeholders));
 
         return true;
     }
 
     private boolean handleStart(CommandSender sender, String[] args) {
         if (!sender.hasPermission("globalboosters.admin")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
         if (args.length < 3) {
-            sender.sendMessage(GradientColor.apply("<gradient:#FF0000:#FF6B6B>Usage: /booster start <type> <duration> [activator]</gradient>"));
+            plugin.getMessagesManager().sendMessage(sender, "<gradient:#FF0000:#FF6B6B>Usage: /booster start <type> <duration> [activator]</gradient>");
             return true;
         }
 
@@ -147,7 +139,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         try {
             type = BoosterType.valueOf(args[1].toUpperCase());
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.invalid-booster"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.invalid-booster"));
             return true;
         }
 
@@ -156,7 +148,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             duration = Integer.parseInt(args[2]);
             if (duration <= 0) throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.invalid-duration"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.invalid-duration"));
             return true;
         }
 
@@ -166,9 +158,9 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         }
 
         if (plugin.getBoosterManager().activateConsoleBooster(type, activatorName, duration)) {
-            sender.sendMessage(GradientColor.apply("<gradient:#00FF00:#32CD32>Successfully started booster " + type.name() + "</gradient>"));
+            plugin.getMessagesManager().sendMessage(sender, "<gradient:#00FF00:#32CD32>Successfully started booster " + type.name() + "</gradient>");
         } else {
-            sender.sendMessage(GradientColor.apply("<gradient:#FF0000:#FF6B6B>Failed to start booster (Active or Max Limit)</gradient>"));
+            plugin.getMessagesManager().sendMessage(sender, "<gradient:#FF0000:#FF6B6B>Failed to start booster (Active or Max Limit)</gradient>");
         }
 
         return true;
@@ -176,12 +168,12 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
     private boolean handleStop(CommandSender sender, String[] args) {
         if (!sender.hasPermission("globalboosters.admin")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
         if (args.length < 2) {
-            sender.sendMessage(GradientColor.apply("<gradient:#FF0000:#FF6B6B>Usage: /booster stop <type></gradient>"));
+            plugin.getMessagesManager().sendMessage(sender, "<gradient:#FF0000:#FF6B6B>Usage: /booster stop <type></gradient>");
             return true;
         }
 
@@ -189,14 +181,14 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         try {
             type = BoosterType.valueOf(args[1].toUpperCase());
         } catch (IllegalArgumentException e) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.invalid-booster"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.invalid-booster"));
             return true;
         }
 
         if (plugin.getBoosterManager().deactivateBooster(type)) {
-            sender.sendMessage(GradientColor.apply("<gradient:#00FF00:#32CD32>Successfully stopped booster " + type.name() + "</gradient>"));
+            plugin.getMessagesManager().sendMessage(sender, "<gradient:#00FF00:#32CD32>Successfully stopped booster " + type.name() + "</gradient>");
         } else {
-            sender.sendMessage(GradientColor.apply("<gradient:#FF0000:#FF6B6B>Booster " + type.name() + " is not active!</gradient>"));
+            plugin.getMessagesManager().sendMessage(sender, "<gradient:#FF0000:#FF6B6B>Booster " + type.name() + " is not active!</gradient>");
         }
 
         return true;
@@ -204,7 +196,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
     private boolean handleReload(CommandSender sender) {
         if (!sender.hasPermission("globalboosters.admin.reload")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
@@ -213,24 +205,23 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         plugin.getMessagesManager().reload();
         plugin.reloadScheduledTask();
 
-        sender.sendMessage(plugin.getMessagesManager().getMessage("general.reload-success"));
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.reload-success"));
         return true;
     }
 
     private boolean handleShop(CommandSender sender) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.player-only"));
+        if (!(sender instanceof Player player)) {
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.player-only"));
             return true;
         }
 
-        Player player = (Player) sender;
         if (!player.hasPermission("globalboosters.shop")) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
         if (!plugin.getConfigManager().isShopGuiEnabled()) {
-            player.sendMessage(plugin.getMessagesManager().getMessage("shop.disabled"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("shop.disabled"));
             return true;
         }
 
@@ -240,13 +231,11 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
     private boolean handleStats(CommandSender sender) {
         if (!sender.hasPermission("globalboosters.admin.stats")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.stats.header"));
-        sender.sendMessage("");
+        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.stats.header") + "\n\n");
 
         ResultSet rs = plugin.getDataManager().getTopBoosters(10);
         if (rs != null) {
@@ -264,7 +253,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
                             placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(type));
                             placeholders.put("%count%", String.valueOf(usageCount));
 
-                            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.stats.entry", placeholders));
+                            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.stats.entry", placeholders));
                             position++;
                         } catch (IllegalArgumentException e) {
                             continue;
@@ -273,38 +262,34 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
                 }
 
                 if (position == 1) {
-                    sender.sendMessage(plugin.getMessagesManager().getMessage("commands.stats.no-data"));
+                    plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.stats.no-data"));
                 }
 
                 rs.close();
             } catch (SQLException e) {
-                sender.sendMessage(plugin.getMessagesManager().getMessage("commands.stats.error"));
+                plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.stats.error"));
                 e.printStackTrace();
             }
         } else {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.stats.error"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.stats.error"));
         }
 
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.stats.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.stats.footer"));
 
         return true;
     }
 
     private boolean handleSchedule(CommandSender sender) {
         if (!sender.hasPermission("globalboosters.admin")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.header"));
-        sender.sendMessage("");
+        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.schedule.header") + "\n\n");
 
         if (!plugin.getConfigManager().isScheduledBoostersEnabled()) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.disabled"));
-            sender.sendMessage("");
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.footer"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.disabled") + "\n\n");
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.footer"));
             return true;
         }
 
@@ -328,13 +313,13 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         placeholders.put("%time%", currentTime);
         placeholders.put("%day%", currentDay);
 
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.current-info", placeholders));
-        sender.sendMessage("");
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.current-info", placeholders) + "\n\n");
+
 
         if (plugin.getConfigManager().getScheduledBoosters().isEmpty()) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.no-schedules"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.no-schedules"));
         } else {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.list-header"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.list-header"));
             for (ConfigManager.ScheduledBooster schedule : plugin.getConfigManager().getScheduledBoosters()) {
                 placeholders.clear();
                 placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(schedule.getType()));
@@ -344,34 +329,30 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
                 StringBuilder daysStr = new StringBuilder();
                 for (DayOfWeek day : schedule.getDays()) {
-                    if (daysStr.length() > 0) daysStr.append(", ");
-                    daysStr.append(day.toString().substring(0, 3));
+                    if (!daysStr.isEmpty()) daysStr.append(", ");
+                    daysStr.append(day.toString(), 0, 3);
                 }
                 placeholders.put("%days%", daysStr.toString());
 
-                sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.entry", placeholders));
+                plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.entry", placeholders));
             }
         }
 
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.schedule.footer"));
         return true;
     }
 
     private boolean handleRandom(CommandSender sender) {
         if (!sender.hasPermission("globalboosters.admin")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.no-permission"));
             return true;
         }
 
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.header"));
-        sender.sendMessage("");
+        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.random.header") + "\n\n");
 
         if (!plugin.getConfigManager().isRandomScheduledEnabled()) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.disabled"));
-            sender.sendMessage("");
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.footer"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.disabled") + "\n\n");
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.footer"));
             return true;
         }
 
@@ -380,45 +361,41 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         placeholders.put("%duration%", String.valueOf(plugin.getConfigManager().getRandomScheduledDuration()));
         placeholders.put("%activator%", plugin.getConfigManager().getRandomScheduledActivatorName());
 
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.info", placeholders));
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.pool-header"));
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.info", placeholders) + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.pool-header"));
 
         List<String> boosterPool = plugin.getConfigManager().getRandomScheduledBoosters();
         for (String boosterName : boosterPool) {
             try {
                 BoosterType type = BoosterType.valueOf(boosterName.toUpperCase());
                 if (plugin.getConfigManager().isBoosterEnabled(type)) {
-                    String name = plugin.getMessagesManager().getBoosterNameRaw(type);
-                    sender.sendMessage(GradientColor.apply("<gradient:#808080:#A9A9A9>• </gradient>") + plugin.getMessagesManager().getBoosterName(type));
+                    plugin.getMessagesManager().sendMessage(sender, "<gradient:#808080:#A9A9A9>• </gradient>" + plugin.getMessagesManager().getBoosterName(type));
                 }
-            } catch (IllegalArgumentException e) {
-                continue;
+            } catch (IllegalArgumentException ignored) {
             }
         }
 
-        sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.random.footer"));
         return true;
     }
 
     private void sendHelp(CommandSender sender) {
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.booster.help-header"));
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-shop"));
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.booster.help-header"));
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-shop"));
         if (sender.hasPermission("globalboosters.admin.give")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-give"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-give"));
         }
         if (sender.hasPermission("globalboosters.admin.reload")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-reload"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-reload"));
         }
         if (sender.hasPermission("globalboosters.admin.stats")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-stats"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-stats"));
         }
         if (sender.hasPermission("globalboosters.admin")) {
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-start"));
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-stop"));
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-schedule"));
-            sender.sendMessage(plugin.getMessagesManager().getMessage("commands.help.booster-random"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-start"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-stop"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-schedule"));
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-random"));
         }
     }
 
