@@ -3,10 +3,10 @@ package com.Lino.globalBoosters.managers;
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.ActiveBooster;
 import com.Lino.globalBoosters.boosters.BoosterType;
+import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -19,6 +19,7 @@ public class BossBarManager {
     private final GlobalBoosters plugin;
     private final Map<BoosterType, BossBar> bossBars;
     private final UUID serverUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BossBarManager(GlobalBoosters plugin) {
         this.plugin = plugin;
@@ -30,17 +31,15 @@ public class BossBarManager {
             return;
         }
 
-        BossBar bossBar = Bukkit.createBossBar(
+        BossBar bossBar = BossBar.bossBar(
                 formatBossBarTitle(booster),
+                (float) booster.getProgress(),
                 getBarColor(booster.getType()),
-                BarStyle.SOLID
+                BossBar.Overlay.PROGRESS
         );
 
-        bossBar.setProgress(booster.getProgress());
-        bossBar.setVisible(true);
-
         for (Player player : Bukkit.getOnlinePlayers()) {
-            bossBar.addPlayer(player);
+            player.showBossBar(bossBar);
         }
 
         bossBars.put(booster.getType(), bossBar);
@@ -54,34 +53,42 @@ public class BossBarManager {
 
         BossBar bossBar = bossBars.get(booster.getType());
         if (bossBar != null) {
-            bossBar.setTitle(formatBossBarTitle(booster));
-            bossBar.setProgress(Math.max(0, Math.min(1, booster.getProgress())));
+            bossBar.name(formatBossBarTitle(booster));
+            bossBar.progress((float) Math.max(0, Math.min(1, booster.getProgress())));
         }
     }
 
     public void removeBossBar(BoosterType type) {
         BossBar bossBar = bossBars.remove(type);
         if (bossBar != null) {
-            bossBar.removeAll();
-            bossBar.setVisible(false);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.hideBossBar(bossBar);
+            }
         }
     }
 
     public void removeAllBossBars() {
         for (BossBar bossBar : bossBars.values()) {
-            bossBar.removeAll();
-            bossBar.setVisible(false);
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.hideBossBar(bossBar);
+            }
         }
         bossBars.clear();
     }
 
     public void addPlayerToBossBars(Player player) {
         for (BossBar bossBar : bossBars.values()) {
-            bossBar.addPlayer(player);
+            player.showBossBar(bossBar);
         }
     }
 
-    private String formatBossBarTitle(ActiveBooster booster) {
+    public void removePlayerFromBossBars(Player player) {
+        for (BossBar bossBar : bossBars.values()) {
+            player.hideBossBar(bossBar);
+        }
+    }
+
+    private Component formatBossBarTitle(ActiveBooster booster) {
         Map<String, String> placeholders = new HashMap<>();
 
         String boosterNameRaw = plugin.getMessagesManager().getRawMessage("booster-names." + booster.getType().name().toLowerCase());
@@ -113,7 +120,7 @@ public class BossBarManager {
             messageKey = "bossbar.format-no-player";
         }
 
-        return plugin.getMessagesManager().getMessage(messageKey, placeholders);
+        return miniMessage.deserialize(plugin.getMessagesManager().getMessage(messageKey, placeholders));
     }
 
     private boolean isNoMultiplierBooster(BoosterType type) {
@@ -123,19 +130,19 @@ public class BossBarManager {
         };
     }
 
-    private BarColor getBarColor(BoosterType type) {
+    private BossBar.Color getBarColor(BoosterType type) {
         if (type.isNegativeEffect()) {
-            return BarColor.RED;
+            return BossBar.Color.RED;
         }
 
         return switch (type) {
-            case PLANT_GROWTH, FARMING_FORTUNE -> BarColor.GREEN;
-            case SPAWNER_RATE, MOB_DROP -> BarColor.RED;
-            case EXP_MULTIPLIER -> BarColor.YELLOW;
-            case MINING_SPEED -> BarColor.BLUE;
-            case FISHING_LUCK -> BarColor.WHITE;
-            case COMBAT_DAMAGE -> BarColor.PURPLE;
-            default -> BarColor.PINK;
+            case PLANT_GROWTH, FARMING_FORTUNE -> BossBar.Color.GREEN;
+            case SPAWNER_RATE, MOB_DROP -> BossBar.Color.RED;
+            case EXP_MULTIPLIER -> BossBar.Color.YELLOW;
+            case MINING_SPEED -> BossBar.Color.BLUE;
+            case FISHING_LUCK -> BossBar.Color.WHITE;
+            case COMBAT_DAMAGE -> BossBar.Color.PURPLE;
+            default -> BossBar.Color.PINK;
         };
     }
 }
