@@ -202,6 +202,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
 
         plugin.reloadConfig();
         plugin.getConfigManager().reload();
+        plugin.getEconomyManager().reload();
         plugin.getMessagesManager().reload();
         plugin.reloadScheduledTask();
 

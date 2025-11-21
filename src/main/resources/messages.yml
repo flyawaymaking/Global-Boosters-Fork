@@ -45,7 +45,7 @@ shop:
   item-lore:
     multiplier: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#00CED1:#00BFFF>Multiplier:</gradient> <gradient:#FFFFFF:#F0F0F0>%multiplier%x</gradient>"
     duration: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#00CED1:#00BFFF>Duration:</gradient> <gradient:#FFFFFF:#F0F0F0>%duration% minutes</gradient>"
-    price: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#FFD700:#FFA500>Price:</gradient> <gradient:#FFFFFF:#F0F0F0>$%price%</gradient>"
+    price: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#FFD700:#FFA500>Price:</gradient> <gradient:#FFFFFF:#F0F0F0>%price%</gradient>"
     already-active: "<gradient:#FF0000:#DC143C>⚠ CURRENTLY ACTIVE ⚠</gradient>"
     click-to-purchase: "<gradient:#00FF00:#32CD32>▶ CLICK TO PURCHASE ◀</gradient>"
     supply-remaining: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#87CEEB:#4682B4>Supply:</gradient> <gradient:#FFFFFF:#F0F0F0>%remaining% left</gradient>"
@@ -56,7 +56,7 @@ shop:
     button: "<gradient:#00FF00:#32CD32>✔ CONFIRM PURCHASE</gradient>"
     cancel: "<gradient:#FF0000:#DC143C>✖ CANCEL</gradient>"
     lore-booster: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#DDA0DD:#9370DB>Booster:</gradient> <gradient:#FFFFFF:#F0F0F0>%booster%</gradient>"
-    lore-price: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#FFD700:#FFA500>Price:</gradient> <gradient:#FFFFFF:#F0F0F0>$%price%</gradient>"
+    lore-price: "<gradient:#808080:#A9A9A9>➤</gradient> <gradient:#FFD700:#FFA500>Price:</gradient> <gradient:#FFFFFF:#F0F0F0>%price%</gradient>"
     click-confirm: "<gradient:#00FF00:#32CD32>➜ Click to purchase!</gradient>"
     click-cancel: "<gradient:#FF6347:#FF0000>➜ Click to cancel!</gradient>"
     return-shop: "<gradient:#808080:#A9A9A9>↩ Return to shop</gradient>"
@@ -69,10 +69,11 @@ shop:
       line5: "<gradient:#808080:#A9A9A9>activate the global booster!</gradient>"
 
 purchase:
-  not-enough-money: "<gradient:#FF0000:#FF6B6B>✖ Insufficient funds! You need $%price%</gradient>"
-  success: "<gradient:#00FF00:#32CD32>✔ Successfully purchased %booster% for $%price%</gradient>"
+  not-enough-money: "<gradient:#FF0000:#FF6B6B>✖ Insufficient funds! You need %price%</gradient>"
+  success: "<gradient:#00FF00:#32CD32>✔ Successfully purchased %booster% for %price%</gradient>"
   inventory-full: "<gradient:#FFA500:#FF8C00>⚠ Inventory full! Booster dropped on ground.</gradient>"
   out-of-stock: "<gradient:#FF0000:#DC143C>✖ %booster% is out of stock! Check back later.</gradient>"
+  transaction-failed: "<red>✖ Transaction failed. Try again.</red>"
 
 booster:
   already-active: "<gradient:#FF6347:#FF0000>⚠ This booster type is already active!</gradient>"

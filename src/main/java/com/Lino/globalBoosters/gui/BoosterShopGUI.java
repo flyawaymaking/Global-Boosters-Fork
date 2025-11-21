@@ -3,6 +3,7 @@ package com.Lino.globalBoosters.gui;
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
 import com.Lino.globalBoosters.listeners.BoosterItemListener;
+import com.Lino.globalBoosters.managers.EconomyManager;
 import com.Lino.globalBoosters.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -78,6 +79,7 @@ public class BoosterShopGUI {
     }
 
     private ItemStack createBoosterItem(BoosterType type) {
+        EconomyManager economy = plugin.getEconomyManager();
         double price = plugin.getConfigManager().getBoosterPrice(type);
         int duration = plugin.getConfigManager().getBoosterDuration(type);
         boolean isActive = plugin.getBoosterManager().isBoosterActive(type);
@@ -85,7 +87,7 @@ public class BoosterShopGUI {
         int remaining = plugin.getSupplyManager().getRemainingPurchases(type);
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("%duration%", String.valueOf(duration));
-        placeholders.put("%price%", String.format("%.2f", price));
+        placeholders.put("%price%", economy.format(price));
 
         List<String> lore = new ArrayList<>();
         lore.add("");
@@ -170,9 +172,10 @@ public class BoosterShopGUI {
         }
 
         double price = plugin.getConfigManager().getBoosterPrice(type);
-        if (!plugin.getEconomy().has(player, price)) {
+        EconomyManager economy = plugin.getEconomyManager();
+        if (!economy.hasEnough(player, price)) {
             Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%price%", String.format("%.2f", price));
+            placeholders.put("%price%", economy.format(price));
             plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money", placeholders));
             if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
             return;

@@ -14,11 +14,17 @@ show_activator_name: true
 
 negative_effects_enabled: true
 
+economy:
+  # If coins_engine enabled - use CoinsEngine currency against Vault
+  coins_engine:
+    enabled: false
+    currency: money
+
 # Control the volume of all plugin sounds. 1.0 is max, 0.0 is muted.
 sound_volume: 1.0
 
-  # Examples: UTC, GMT, America/New_York, Europe/London, Europe/Rome,
-  # Asia/Tokyo, America/Los_Angeles, Australia/Sydney
+# Examples: UTC, GMT, America/New_York, Europe/London, Europe/Rome,
+#   Asia/Tokyo, America/Los_Angeles, Australia/Sydney
 # Full list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 scheduled_boosters:
   enabled: true

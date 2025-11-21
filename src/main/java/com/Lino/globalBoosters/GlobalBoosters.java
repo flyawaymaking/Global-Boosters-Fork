@@ -12,15 +12,14 @@ import com.Lino.globalBoosters.listeners.FlyBoosterListener;
 import com.Lino.globalBoosters.listeners.GameEventListener;
 import com.Lino.globalBoosters.managers.BoosterManager;
 import com.Lino.globalBoosters.managers.BossBarManager;
+import com.Lino.globalBoosters.managers.EconomyManager;
 import com.Lino.globalBoosters.managers.SupplyManager;
 import com.Lino.globalBoosters.tasks.BoosterTickTask;
 import com.Lino.globalBoosters.tasks.ScheduledBoosterTask;
 import com.Lino.globalBoosters.tasks.RandomScheduledBoosterTask;
 import com.Lino.globalBoosters.boosters.BoosterType;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.potion.PotionEffectType;
@@ -28,7 +27,6 @@ import org.bukkit.potion.PotionEffectType;
 public class GlobalBoosters extends JavaPlugin {
 
     private static GlobalBoosters instance;
-    private Economy economy;
     private ConfigManager configManager;
     private MessagesManager messagesManager;
     private DataManager dataManager;
@@ -40,29 +38,40 @@ public class GlobalBoosters extends JavaPlugin {
     private SupplyManager supplyManager;
     private BukkitTask scheduledBoosterTask;
     private BukkitTask randomScheduledBoosterTask;
+    private EconomyManager economyManager;
 
     @Override
     public void onEnable() {
         instance = this;
 
-        // Load config first to check if we need Vault
         configManager = new ConfigManager(this);
+        initializeManagers();
 
-        // Only check for Vault if the shop GUI is enabled
         if (configManager.isShopGuiEnabled()) {
-            if (!setupEconomy()) {
-                getLogger().severe("Vault dependency not found! Disabling plugin...");
+            if (economyManager.getProvider() == null) {
+                getLogger().severe("No economy provider found! Disabling plugin...");
                 getServer().getPluginManager().disablePlugin(this);
                 return;
             }
         }
 
-        initializeManagers();
         registerCommands();
         registerListeners();
         startTasks();
 
         getLogger().info("GlobalBoosters has been enabled!");
+    }
+
+    private void initializeManagers() {
+        configManager = new ConfigManager(this);
+        messagesManager = new MessagesManager(this);
+        dataManager = new DataManager(this);
+        economyManager = new EconomyManager(this); // Новый менеджер
+        boosterManager = new BoosterManager(this);
+        bossBarManager = new BossBarManager(this);
+        supplyManager = new SupplyManager(this);
+
+        dataManager.loadActiveBoosters();
     }
 
     @Override
@@ -133,18 +142,6 @@ public class GlobalBoosters extends JavaPlugin {
         }
     }
 
-    private void initializeManagers() {
-        // configManager is initialized in onEnable but re-initializing here ensures reload safety
-        configManager = new ConfigManager(this);
-        messagesManager = new MessagesManager(this);
-        dataManager = new DataManager(this);
-        boosterManager = new BoosterManager(this);
-        bossBarManager = new BossBarManager(this);
-        supplyManager = new SupplyManager(this);
-
-        dataManager.loadActiveBoosters();
-    }
-
     private void registerCommands() {
         BoostShopCommand boostShopCommand = new BoostShopCommand(this);
         getCommand("boostshop").setExecutor(boostShopCommand);
@@ -202,24 +199,12 @@ public class GlobalBoosters extends JavaPlugin {
         }
     }
 
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            return false;
-        }
-        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) {
-            return false;
-        }
-        economy = rsp.getProvider();
-        return true;
-    }
-
     public static GlobalBoosters getInstance() {
         return instance;
     }
 
-    public Economy getEconomy() {
-        return economy;
+    public EconomyManager getEconomyManager() {
+        return economyManager;
     }
 
     public ConfigManager getConfigManager() {

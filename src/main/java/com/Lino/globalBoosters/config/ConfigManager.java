@@ -11,6 +11,7 @@ import java.util.*;
 public class ConfigManager {
 
     private final GlobalBoosters plugin;
+    private FileConfiguration config;
     private final Map<BoosterType, Double> boosterPrices;
     private final Map<BoosterType, Integer> boosterDurations;
     private final Map<BoosterType, Double> boosterMultipliers;
@@ -47,7 +48,7 @@ public class ConfigManager {
 
     private void loadConfig() {
         plugin.saveDefaultConfig();
-        FileConfiguration config = plugin.getConfig();
+        config = plugin.getConfig();
 
         maxActiveBoosters = config.getInt("max_active_boosters", 3);
         limitedSupplyEnabled = config.getBoolean("limited_supply_mode", false);
@@ -325,5 +326,13 @@ public class ConfigManager {
         public Set<DayOfWeek> getDays() {
             return days;
         }
+    }
+
+    public boolean isCoinsEngineEnabled() {
+        return config.getBoolean("economy.coins_engine.enabled", false);
+    }
+
+    public String getCoinsEngineCurrency() {
+        return config.getString("economy.coins_engine.currency", "money");
     }
 }
