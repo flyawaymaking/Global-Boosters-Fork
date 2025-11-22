@@ -3,6 +3,8 @@ package com.Lino.globalBoosters.listeners;
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
 import com.Lino.globalBoosters.gui.BoosterShopGUI;
+import com.Lino.globalBoosters.gui.CoinExchangeGUI;
+import com.Lino.globalBoosters.gui.ConfirmExchangeGUI;
 import com.Lino.globalBoosters.gui.ConfirmPurchaseGUI;
 import com.Lino.globalBoosters.items.BoosterItem;
 import org.bukkit.Material;
@@ -28,12 +30,16 @@ public class BoosterItemListener implements Listener {
 
     private final GlobalBoosters plugin;
     private final Map<Player, BoosterShopGUI> shopGUIs;
+    private final Map<Player, CoinExchangeGUI> coinExchangeGUIs;
+    private final Map<Player, ConfirmExchangeGUI> confirmExchangeGUIs;
     private final Map<Player, ConfirmPurchaseGUI> confirmGUIs;
 
     public BoosterItemListener(GlobalBoosters plugin) {
         this.plugin = plugin;
         this.shopGUIs = new HashMap<>();
         this.confirmGUIs = new HashMap<>();
+        this.coinExchangeGUIs = new HashMap<>();
+        this.confirmExchangeGUIs = new HashMap<>();
     }
 
     @EventHandler
@@ -175,14 +181,33 @@ public class BoosterItemListener implements Listener {
                 ConfirmPurchaseGUI gui = confirmGUIs.get(player);
                 gui.handleClick(event.getRawSlot());
             }
+        } else if (coinExchangeGUIs.containsKey(player)) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
+                return;
+            }
+
+            if (event.getRawSlot() < event.getInventory().getSize()) {
+                CoinExchangeGUI gui = coinExchangeGUIs.get(player);
+                gui.handleClick(event.getRawSlot());
+            }
+        } else if (confirmExchangeGUIs.containsKey(player)) {
+            event.setCancelled(true);
+            if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) {
+                return;
+            }
+
+            if (event.getRawSlot() < event.getInventory().getSize()) {
+                ConfirmExchangeGUI gui = confirmExchangeGUIs.get(player);
+                gui.handleClick(event.getRawSlot());
+            }
         }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getPlayer() instanceof Player player) {
-            shopGUIs.remove(player);
-            confirmGUIs.remove(player);
+            unregisterGUIs(player);
         }
     }
 
@@ -241,6 +266,14 @@ public class BoosterItemListener implements Listener {
         }
     }
 
+    public void registerCoinExchangeGUI(Player player, CoinExchangeGUI gui) {
+        coinExchangeGUIs.put(player, gui);
+    }
+
+    public void registerConfirmExchangeGUI(Player player, ConfirmExchangeGUI gui) {
+        confirmExchangeGUIs.put(player, gui);
+    }
+
     public void registerShopGUI(Player player, BoosterShopGUI gui) {
         shopGUIs.put(player, gui);
     }
@@ -252,5 +285,7 @@ public class BoosterItemListener implements Listener {
     public void unregisterGUIs(Player player) {
         shopGUIs.remove(player);
         confirmGUIs.remove(player);
+        coinExchangeGUIs.remove(player);
+        confirmExchangeGUIs.remove(player);
     }
 }

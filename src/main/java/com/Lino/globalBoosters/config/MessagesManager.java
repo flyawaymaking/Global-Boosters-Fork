@@ -10,6 +10,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class MessagesManager {
@@ -36,6 +38,18 @@ public class MessagesManager {
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
     }
 
+    private String formatMessage(String message, Map<String, String> placeholders) {
+        if (placeholders != null) {
+            for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+                String value = entry.getValue();
+                // Strip any existing color codes from the value
+                value = stripColorCodes(value);
+                message = message.replace(entry.getKey(), value);
+            }
+        }
+        return message;
+    }
+
     public String getMessage(String key) {
         return getMessage(key, null);
     }
@@ -45,16 +59,20 @@ public class MessagesManager {
         if (message == null) {
             return "<gradient:#FF0000:#FF6B6B>Message not found: " + key + "</gradient>";
         }
-        if (placeholders != null) {
-            for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-                String value = entry.getValue();
-                // Strip any existing color codes from the value
-                value = stripColorCodes(value);
-                message = message.replace(entry.getKey(), value);
-            }
-        }
+        return formatMessage(message, placeholders);
+    }
 
-        return message;
+    public List<String> getMessageList(String key) {
+        return getMessageList(key, null);
+    }
+
+    public List<String> getMessageList(String key, Map<String, String> placeholders) {
+        List<String> resultMessage = new ArrayList<>();
+
+        for (String loreLine : messagesConfig.getStringList(key)) {
+            resultMessage.add(formatMessage(loreLine, placeholders));
+        }
+        return resultMessage;
     }
 
     public Component getMessageComponent(String key, Map<String, String> placeholders) {

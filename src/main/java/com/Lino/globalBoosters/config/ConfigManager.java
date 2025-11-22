@@ -80,8 +80,7 @@ public class ConfigManager {
         }
 
         for (BoosterType type : BoosterType.values()) {
-            String path = "boosters."
-                    + type.name().toLowerCase();
+            String path = "boosters." + type.name().toLowerCase();
 
             if (!config.contains(path + ".enabled")) {
                 config.set(path + ".enabled", true);
@@ -328,11 +327,63 @@ public class ConfigManager {
         }
     }
 
+    public boolean isVaultEnabled() {
+        return config.getBoolean("economy.vault.enabled", true);
+    }
+
+    public String getVaultItem() {
+        return config.getString("economy.vault.item", "KELP");
+    }
+
+    public Double getVaultMultiplier() {
+        return config.getDouble("economy.vault.price_multiplier", 1.0);
+    }
+
     public boolean isCoinsEngineEnabled() {
         return config.getBoolean("economy.coins_engine.enabled", false);
     }
 
-    public String getCoinsEngineCurrency() {
-        return config.getString("economy.coins_engine.currency", "money");
+    public Map<String, Double> getCoinsEngineCurrencies() {
+        Map<String, Double> currencies = new HashMap<>();
+
+        if (config.isConfigurationSection("economy.coins_engine.currencies")) {
+            ConfigurationSection currenciesSection = config.getConfigurationSection("economy.coins_engine.currencies");
+            for (String currencyId : currenciesSection.getKeys(false)) {
+                double priceMultiplier = currenciesSection.getDouble(currencyId + ".price_multiplier", 1.0);
+                currencies.put(currencyId, priceMultiplier);
+            }
+        }
+
+        return currencies;
+    }
+
+    public boolean isBoosterCoinsEnabled() {
+        return config.getBoolean("economy.booster_coins.enabled", true);
+    }
+
+    public String getBoosterCoinsName() {
+        return config.getString("economy.booster_coins.name", "<gradient:#FFD700:#FFA500>Бустер-Монета</gradient>");
+    }
+
+    public String getBoosterCoinsMaterialName() {
+        return config.getString("economy.booster_coins.item", "GOLD_NUGGET");
+    }
+
+    public Double getBoosterCoinsMultiplier() {
+        return config.getDouble("economy.booster_coins.price_multiplier", 1.0);
+    }
+
+    public Map<String, Integer> getBoosterCoinsExchangeRates() {
+        Map<String, Integer> exchangeRates = new HashMap<>();
+
+        if (config.isConfigurationSection("economy.booster_coins.exchange_rates")) {
+            ConfigurationSection exchangeRatesSection = config.getConfigurationSection("economy.booster_coins.exchange_rates");
+            for (String key : exchangeRatesSection.getKeys(false)) {
+                int amount = exchangeRatesSection.getInt(key, 1);
+                exchangeRates.put(key.toUpperCase(), amount);
+            }
+        }
+
+        return exchangeRates;
     }
 }

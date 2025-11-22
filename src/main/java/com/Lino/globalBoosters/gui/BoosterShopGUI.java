@@ -2,8 +2,8 @@ package com.Lino.globalBoosters.gui;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
+import com.Lino.globalBoosters.economy.EconomyProvider;
 import com.Lino.globalBoosters.listeners.BoosterItemListener;
-import com.Lino.globalBoosters.managers.EconomyManager;
 import com.Lino.globalBoosters.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,10 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BoosterShopGUI {
 
@@ -23,6 +20,7 @@ public class BoosterShopGUI {
     private final Player player;
     private final Inventory inventory;
     private final Map<Integer, BoosterType> slotToBooster;
+    private String currentProviderKey;
 
     private static final int[] BOOSTER_SLOTS = {
             10, 11, 12, 13, 14, 15, 16,
@@ -33,16 +31,24 @@ public class BoosterShopGUI {
     };
 
     private static final int[] DECORATION_SLOTS = {
-            0, 1, 2, 3, 4, 5, 6, 7, 8,
+            1, 2, 3, 4, 5, 6, 7,
             9, 17, 18, 26, 27, 35, 36, 44, 45, 53
     };
 
+    private static int CURRENCY_CHANGE_SLOT = 0;
+    private static int BOOSTER_COINS_EXCHANGE_SLOT = 8;
+
     public BoosterShopGUI(GlobalBoosters plugin, Player player) {
+        this(plugin, player, plugin.getEconomyManager().getDefaultProviderKey());
+    }
+
+    public BoosterShopGUI(GlobalBoosters plugin, Player player, String providerKey) {
         this.plugin = plugin;
         this.player = player;
-        this.inventory = Bukkit.createInventory(null, 54, plugin.getMessagesManager().getMessageComponent("shop.title", null));
+        this.currentProviderKey = providerKey != null ? providerKey : plugin.getEconomyManager().getDefaultProviderKey();
         this.slotToBooster = new HashMap<>();
 
+        this.inventory = Bukkit.createInventory(null, 54, plugin.getMessagesManager().getMessageComponent("shop.title", null));
         setupGUI();
     }
 
@@ -67,6 +73,53 @@ public class BoosterShopGUI {
             slotToBooster.put(slot, type);
             slotIndex++;
         }
+        setupNavigationButtons();
+    }
+
+    private void setupNavigationButtons() {
+        if (plugin.getEconomyManager().getProvider("boostercoins") != null &&
+                plugin.getEconomyManager().getProvider("boostercoins").isAvailable()) {
+
+            ItemStack coinExchangeButton = new ItemBuilder(Material.TARGET)
+                    .setDisplayName(plugin.getMessagesManager().getMessage("shop.coin-exchange-button"))
+                    .setLore(plugin.getMessagesManager().getMessageList("shop.coin-exchange-button-lore"))
+                    .build();
+
+            inventory.setItem(BOOSTER_COINS_EXCHANGE_SLOT, coinExchangeButton);
+        }
+        setupCurrencyChangeButton();
+    }
+
+    private void setupCurrencyChangeButton() {
+        EconomyProvider currentProvider = getCurrentProvider();
+        if (currentProvider == null) return;
+
+        double balance = currentProvider.getBalance(player);
+        String nextProviderKey = plugin.getEconomyManager().getNextProvider(currentProviderKey);
+        EconomyProvider nextProvider = plugin.getEconomyManager().getProvider(nextProviderKey);
+
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("%currency%", currentProvider.getCurrencyName());
+        placeholders.put("%balance%", currentProvider.format(balance));
+        placeholders.put("%next_currency%", nextProviderKey != null ? nextProvider.getCurrencyName() : "N/A");
+
+        List<String> lore = new ArrayList<>();
+        lore.add("");
+        lore.add(plugin.getMessagesManager().getMessage("shop.current-balance", placeholders));
+        if (nextProviderKey != null) {
+            lore.add(plugin.getMessagesManager().getMessage("shop.next-currency", placeholders));
+        }
+        lore.add("");
+        lore.add(plugin.getMessagesManager().getMessage("shop.click-to-change"));
+
+        Material icon = currentProvider.getIcon();
+
+        ItemStack currencyButton = new ItemBuilder(icon)
+                .setDisplayName(plugin.getMessagesManager().getMessage("shop.current-currency", placeholders))
+                .setLore(lore)
+                .build();
+
+        inventory.setItem(CURRENCY_CHANGE_SLOT, currencyButton);
     }
 
     private void fillDecoration() {
@@ -79,15 +132,20 @@ public class BoosterShopGUI {
     }
 
     private ItemStack createBoosterItem(BoosterType type) {
-        EconomyManager economy = plugin.getEconomyManager();
-        double price = plugin.getConfigManager().getBoosterPrice(type);
+        EconomyProvider provider = getCurrentProvider();
+        if (provider == null) {
+            provider = plugin.getEconomyManager().getDefaultProvider();
+        }
+
+        double price = Math.ceil(plugin.getConfigManager().getBoosterPrice(type) * provider.getPriceMultiplier());
         int duration = plugin.getConfigManager().getBoosterDuration(type);
         boolean isActive = plugin.getBoosterManager().isBoosterActive(type);
         boolean limitedSupply = plugin.getConfigManager().isLimitedSupplyEnabled();
         int remaining = plugin.getSupplyManager().getRemainingPurchases(type);
+
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("%duration%", String.valueOf(duration));
-        placeholders.put("%price%", economy.format(price));
+        placeholders.put("%price%", provider.format(price));
 
         List<String> lore = new ArrayList<>();
         lore.add("");
@@ -144,8 +202,7 @@ public class BoosterShopGUI {
 
     public void open() {
         player.openInventory(inventory);
-        float volume = (float) (plugin.getConfigManager().getSoundVolume() * 0.5f);
-        if (volume > 0) player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, volume, 1.0f);
+        playSound(Sound.BLOCK_CHEST_OPEN, 0.5f, 1.0f);
 
         BoosterItemListener listener = getBoosterItemListener();
         if (listener != null) {
@@ -154,38 +211,68 @@ public class BoosterShopGUI {
     }
 
     public void handleClick(int slot) {
+        if (slot == BOOSTER_COINS_EXCHANGE_SLOT) {
+            new CoinExchangeGUI(plugin, player).open();
+            return;
+        }
+
+        if (slot == CURRENCY_CHANGE_SLOT) {
+            String nextProviderKey = plugin.getEconomyManager().getNextProvider(currentProviderKey);
+            if (nextProviderKey != null) {
+                currentProviderKey = nextProviderKey;
+                new BoosterShopGUI(plugin, player, currentProviderKey).open();
+                playSound(Sound.UI_BUTTON_CLICK, 0.7f, 1.2f);
+            }
+            return;
+        }
+
         BoosterType type = slotToBooster.get(slot);
         if (type == null) {
             return;
         }
-
-        float volume = (float) plugin.getConfigManager().getSoundVolume();
 
         if (plugin.getConfigManager().isLimitedSupplyEnabled()) {
             if (!plugin.getSupplyManager().canPurchase(type)) {
                 Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(type));
                 plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.out-of-stock", placeholders));
-                if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
+                playSound(Sound.ENTITY_VILLAGER_NO, 1f, 1.0f);
                 return;
             }
         }
 
-        double price = plugin.getConfigManager().getBoosterPrice(type);
-        EconomyManager economy = plugin.getEconomyManager();
-        if (!economy.hasEnough(player, price)) {
-            Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%price%", economy.format(price));
-            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money", placeholders));
-            if (volume > 0) player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, volume, 1.0f);
+        EconomyProvider provider = getCurrentProvider();
+        if (provider == null) {
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.economy-unavailable"));
             return;
         }
 
-        new ConfirmPurchaseGUI(plugin, player, type, price).open();
+        double price = Math.ceil(plugin.getConfigManager().getBoosterPrice(type) * provider.getPriceMultiplier());
+
+        if (!provider.hasEnough(player, price)) {
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("%price%", provider.format(price));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money", placeholders));
+            playSound(Sound.ENTITY_VILLAGER_NO, 1f, 1.0f);
+            return;
+        }
+
+        new ConfirmPurchaseGUI(plugin, player, type, price, currentProviderKey).open();
+    }
+
+    public EconomyProvider getCurrentProvider() {
+        return plugin.getEconomyManager().getProvider(currentProviderKey);
     }
 
     public Inventory getInventory() {
         return inventory;
+    }
+
+    private void playSound(Sound sound, float volumeMultiplier, float pitch) {
+        float volume = (float) plugin.getConfigManager().getSoundVolume() * volumeMultiplier;
+        if (volume > 0) {
+            player.playSound(player.getLocation(), sound, volume, pitch);
+        }
     }
 
     private BoosterItemListener getBoosterItemListener() {

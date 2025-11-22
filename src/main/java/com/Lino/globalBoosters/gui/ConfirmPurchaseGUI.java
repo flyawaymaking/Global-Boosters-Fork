@@ -2,9 +2,9 @@ package com.Lino.globalBoosters.gui;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
+import com.Lino.globalBoosters.economy.EconomyProvider;
 import com.Lino.globalBoosters.items.BoosterItem;
 import com.Lino.globalBoosters.listeners.BoosterItemListener;
-import com.Lino.globalBoosters.managers.EconomyManager;
 import com.Lino.globalBoosters.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,13 +23,15 @@ public class ConfirmPurchaseGUI {
     private final Player player;
     private final BoosterType boosterType;
     private final double price;
+    private final String providerKey;
     private final Inventory inventory;
 
-    public ConfirmPurchaseGUI(GlobalBoosters plugin, Player player, BoosterType boosterType, double price) {
+    public ConfirmPurchaseGUI(GlobalBoosters plugin, Player player, BoosterType boosterType, double price, String providerKey) {
         this.plugin = plugin;
         this.player = player;
         this.boosterType = boosterType;
         this.price = price;
+        this.providerKey = providerKey;
         this.inventory = Bukkit.createInventory(null, 27, plugin.getMessagesManager().getMessageComponent("shop.confirm-title", null));
 
         setupGUI();
@@ -42,11 +44,16 @@ public class ConfirmPurchaseGUI {
         for (int i = 0; i < 27; i++) {
             inventory.setItem(i, grayGlass);
         }
-        EconomyManager economy = plugin.getEconomyManager();
+
+        EconomyProvider provider = getProvider();
+        if (provider == null) {
+            provider = plugin.getEconomyManager().getDefaultProvider();
+        }
 
         Map<String, String> placeholders = new HashMap<>();
         placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(boosterType));
-        placeholders.put("%price%", economy.format(price));
+        placeholders.put("%price%", provider.format(price));
+
         ItemStack confirmItem = new ItemBuilder(Material.LIME_WOOL)
                 .setDisplayName(plugin.getMessagesManager().getMessage("shop.confirm.button"))
                 .setLore(Arrays.asList(
@@ -99,16 +106,23 @@ public class ConfirmPurchaseGUI {
             purchaseBooster();
         } else if (slot == 15) {
             player.closeInventory();
-            new BoosterShopGUI(plugin, player).open();
+            new BoosterShopGUI(plugin, player, providerKey).open();
         }
     }
 
     private void purchaseBooster() {
-        EconomyManager economy = plugin.getEconomyManager();
+        EconomyProvider provider = getProvider();
+        if (provider == null) {
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.economy-unavailable"));
+            playSound(Sound.ENTITY_VILLAGER_NO, 1f, 1.0f);
+            player.closeInventory();
+            return;
+        }
 
-        if (!economy.hasEnough(player, price)) {
-            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money",
-                    Map.of("%price%", economy.format(price))));
+        if (!provider.hasEnough(player, price)) {
+            Map<String, String> placeholders = new HashMap<>();
+            placeholders.put("%price%", provider.format(price));
+            plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.not-enough-money", placeholders));
             playSound(Sound.ENTITY_VILLAGER_NO, 1f, 1.0f);
             player.closeInventory();
             return;
@@ -122,7 +136,7 @@ public class ConfirmPurchaseGUI {
             return;
         }
 
-        if (!economy.withdraw(player, price)) {
+        if (!provider.withdraw(player, price)) {
             plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.transaction-failed"));
             playSound(Sound.ENTITY_VILLAGER_NO, 1f, 1.0f);
             player.closeInventory();
@@ -145,15 +159,21 @@ public class ConfirmPurchaseGUI {
             player.getInventory().addItem(boosterItem);
         }
 
-        plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.success",
-                Map.of("%booster%", plugin.getMessagesManager().getBoosterNameRaw(boosterType),
-                        "%price%", economy.format(price))));
+        Map<String, String> successPlaceholders = new HashMap<>();
+        successPlaceholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(boosterType));
+        successPlaceholders.put("%price%", provider.format(price));
+
+        plugin.getMessagesManager().sendMessage(player, plugin.getMessagesManager().getMessage("purchase.success", successPlaceholders));
         playSound(Sound.ENTITY_PLAYER_LEVELUP, 1f, 1.0f);
         player.closeInventory();
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            new BoosterShopGUI(plugin, player).open();
+            new BoosterShopGUI(plugin, player, providerKey).open();
         }, 1L);
+    }
+
+    private EconomyProvider getProvider() {
+        return plugin.getEconomyManager().getProvider(providerKey);
     }
 
     private void playSound(Sound sound, float volumeMultiplier, float pitch) {

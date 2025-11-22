@@ -177,7 +177,6 @@ public class GameEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        Block block = event.getBlock();
 
         if (plugin.getBoosterManager().isBoosterActive(BoosterType.MINING_SPEED)) {
             ActiveBooster booster = plugin.getBoosterManager().getActiveBooster(BoosterType.MINING_SPEED);
@@ -377,8 +376,6 @@ public class GameEventListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity();
-
         if (plugin.getBoosterManager().isBoosterActive(BoosterType.KEEP_INVENTORY)) {
             ActiveBooster booster = plugin.getBoosterManager().getActiveBooster(BoosterType.KEEP_INVENTORY);
             if (booster != null && !booster.isExpired()) {

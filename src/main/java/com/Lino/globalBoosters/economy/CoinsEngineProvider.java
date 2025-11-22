@@ -1,25 +1,34 @@
 package com.Lino.globalBoosters.economy;
 
 import com.Lino.globalBoosters.GlobalBoosters;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.api.currency.Currency;
 
-public class CoinsEngineEconomyProvider implements EconomyProvider {
+public class CoinsEngineProvider implements EconomyProvider {
 
     private final GlobalBoosters plugin;
+    private final String currencyId;
+    private final Double multiplier;
     private Currency currency;
+    private String currencyName = "money";
+    private Material icon = Material.SUNFLOWER;
 
-    public CoinsEngineEconomyProvider(GlobalBoosters plugin) {
+    public CoinsEngineProvider(GlobalBoosters plugin, @NotNull String currencyId, @NotNull Double multiplier) {
         this.plugin = plugin;
+        this.currencyId = currencyId;
+        this.multiplier = multiplier;
         setupCoinsEngine();
     }
 
     private void setupCoinsEngine() {
-        String currencyName = plugin.getConfigManager().getCoinsEngineCurrency();
         try {
-            currency = CoinsEngineAPI.getCurrency(currencyName);
-
+            currency = CoinsEngineAPI.getCurrency(currencyId);
+            assert currency != null;
+            currencyName = currency.getName();
+            icon = currency.icon().getMaterial();
         } catch (Exception e) {
             currency = null;
         }
@@ -76,5 +85,20 @@ public class CoinsEngineEconomyProvider implements EconomyProvider {
     @Override
     public String format(double amount) {
         return currency.format(amount);
+    }
+
+    @Override
+    public Double getPriceMultiplier() {
+        return multiplier;
+    }
+
+    @Override
+    public String getCurrencyName() {
+        return currencyName;
+    }
+
+    @Override
+    public Material getIcon() {
+        return icon;
     }
 }

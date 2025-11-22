@@ -48,7 +48,7 @@ public class GlobalBoosters extends JavaPlugin {
         initializeManagers();
 
         if (configManager.isShopGuiEnabled()) {
-            if (economyManager.getProvider() == null) {
+            if (!economyManager.isAvailable()) {
                 getLogger().severe("No economy provider found! Disabling plugin...");
                 getServer().getPluginManager().disablePlugin(this);
                 return;
@@ -66,7 +66,7 @@ public class GlobalBoosters extends JavaPlugin {
         configManager = new ConfigManager(this);
         messagesManager = new MessagesManager(this);
         dataManager = new DataManager(this);
-        economyManager = new EconomyManager(this); // Новый менеджер
+        economyManager = new EconomyManager(this);
         boosterManager = new BoosterManager(this);
         bossBarManager = new BossBarManager(this);
         supplyManager = new SupplyManager(this);

@@ -1,17 +1,25 @@
 package com.Lino.globalBoosters.economy;
 
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-public class VaultEconomyProvider implements EconomyProvider {
+public class VaultProvider implements EconomyProvider {
 
     private final JavaPlugin plugin;
+    private final String materialName;
+    private final Double multiplier;
     private Economy economy;
+    private String currencyName = "$";
+    private Material icon = Material.KELP;
 
-    public VaultEconomyProvider(JavaPlugin plugin) {
+    public VaultProvider(JavaPlugin plugin, @NotNull String materialName, @NotNull Double multiplier) {
         this.plugin = plugin;
+        this.materialName = materialName;
+        this.multiplier = multiplier;
         setupVault();
     }
 
@@ -25,6 +33,14 @@ public class VaultEconomyProvider implements EconomyProvider {
             return;
         }
         economy = rsp.getProvider();
+        currencyName = economy.currencyNameSingular();
+
+        Material newMaterial = Material.getMaterial(materialName.toUpperCase());
+        if (newMaterial == null) {
+            plugin.getLogger().warning("Invalid vault material: " + materialName + ", using KELP instead");
+        } else {
+            icon = newMaterial;
+        }
     }
 
     @Override
@@ -55,5 +71,20 @@ public class VaultEconomyProvider implements EconomyProvider {
     @Override
     public String format(double amount) {
         return economy.format(amount);
+    }
+
+    @Override
+    public Double getPriceMultiplier() {
+        return multiplier;
+    }
+
+    @Override
+    public String getCurrencyName() {
+        return currencyName;
+    }
+
+    @Override
+    public Material getIcon() {
+        return icon;
     }
 }

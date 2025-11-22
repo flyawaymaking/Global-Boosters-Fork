@@ -1,13 +1,19 @@
 package com.Lino.globalBoosters.managers;
 
 import com.Lino.globalBoosters.GlobalBoosters;
+import com.Lino.globalBoosters.config.ConfigManager;
 import com.Lino.globalBoosters.economy.*;
-import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EconomyManager {
 
     private final GlobalBoosters plugin;
-    private EconomyProvider provider;
+    private final Map<String, EconomyProvider> providers = new HashMap<>();
+    private String defaultProvider;
 
     public EconomyManager(GlobalBoosters plugin) {
         this.plugin = plugin;
@@ -15,46 +21,65 @@ public class EconomyManager {
     }
 
     private void setupProviders() {
-        if (plugin.getConfigManager().isCoinsEngineEnabled()) {
-            CoinsEngineEconomyProvider coinsProvider = new CoinsEngineEconomyProvider(plugin);
-            if (coinsProvider.isAvailable()) {
-                provider = coinsProvider;
-                return;
+        providers.clear();
+        defaultProvider = null;
+        ConfigManager configManager = plugin.getConfigManager();
+        if (configManager.isBoosterCoinsEnabled()) {
+            BoosterCoinProvider boosterCoinProvider = new BoosterCoinProvider(plugin, configManager.getBoosterCoinsName(),
+                    configManager.getBoosterCoinsMaterialName(), configManager.getBoosterCoinsMultiplier(), configManager.getBoosterCoinsExchangeRates());
+            if (boosterCoinProvider.isAvailable()) {
+                providers.put("boostercoins", boosterCoinProvider);
+                if (defaultProvider == null) defaultProvider = "boostercoins";
             }
         }
-        VaultEconomyProvider vaultProvider = new VaultEconomyProvider(plugin);
-        if (vaultProvider.isAvailable()) {
-            provider = vaultProvider;
-            return;
+        if (configManager.isVaultEnabled()) {
+            VaultProvider vaultProvider = new VaultProvider(plugin, configManager.getVaultItem(), configManager.getVaultMultiplier());
+            if (vaultProvider.isAvailable()) {
+                providers.put("vault", vaultProvider);
+                if (defaultProvider == null) defaultProvider = "vault";
+            }
         }
-        provider = null;
+        if (configManager.isCoinsEngineEnabled()) {
+            for (Map.Entry<String, Double> entry : configManager.getCoinsEngineCurrencies().entrySet()) {
+                String currencyId = entry.getKey();
+                Double multiplier = entry.getValue();
+
+                CoinsEngineProvider coinsEngineProvider = new CoinsEngineProvider(plugin, currencyId, multiplier);
+                if (coinsEngineProvider.isAvailable()) {
+                    providers.put("coinsengine-" + currencyId, coinsEngineProvider);
+                    if (defaultProvider == null) defaultProvider = "coinsengine-" + currencyId;
+                }
+            }
+        }
     }
 
-    public EconomyProvider getProvider() {
-        return provider;
+    public String getNextProvider(String currentProvider) {
+        List<String> availableProviders = new ArrayList<>(providers.keySet());
+        if (availableProviders.isEmpty()) return null;
+
+        int currentIndex = availableProviders.indexOf(currentProvider);
+        int nextIndex = (currentIndex + 1) % availableProviders.size();
+        return availableProviders.get(nextIndex);
+    }
+
+    public EconomyProvider getDefaultProvider() {
+        return providers.get(defaultProvider);
+    }
+
+    public String getDefaultProviderKey() {
+        return defaultProvider;
+    }
+
+
+    public EconomyProvider getProvider(String key) {
+        return providers.get(key);
     }
 
     public void reload() {
         setupProviders();
     }
 
-    public double getBalance(Player player) {
-        return provider.getBalance(player);
-    }
-
-    public boolean hasEnough(Player player, double amount) {
-        return provider.hasEnough(player, amount);
-    }
-
-    public boolean withdraw(Player player, double amount) {
-        return provider.withdraw(player, amount);
-    }
-
-    public boolean deposit(Player player, double amount) {
-        return provider.deposit(player, amount);
-    }
-
-    public String format(double amount) {
-        return provider.format(amount);
+    public boolean isAvailable() {
+        return !providers.isEmpty();
     }
 }

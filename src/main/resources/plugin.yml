@@ -1,5 +1,5 @@
 name: GlobalBoosters
-version: '3.3.1'
+version: '3.3.2'
 main: com.Lino.globalBoosters.GlobalBoosters
 api-version: '1.21'
 softdepend: [Vault, CoinsEngine]
