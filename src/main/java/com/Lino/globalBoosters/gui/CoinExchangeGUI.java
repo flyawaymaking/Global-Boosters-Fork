@@ -3,6 +3,7 @@ package com.Lino.globalBoosters.gui;
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.economy.BoosterCoinProvider;
 import com.Lino.globalBoosters.listeners.BoosterItemListener;
+import com.Lino.globalBoosters.managers.LanguageManager;
 import com.Lino.globalBoosters.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,10 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CoinExchangeGUI {
 
@@ -75,7 +73,7 @@ public class CoinExchangeGUI {
 
     private ItemStack createExchangeItem(Material material, int requiredAmount) {
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%material%", getMaterialDisplayName(material));
+        placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
         placeholders.put("%amount%", String.valueOf(requiredAmount));
 
         int playerAmount = countPlayerItems(material);
@@ -99,7 +97,7 @@ public class CoinExchangeGUI {
         return new ItemBuilder(displayMaterial)
                 .setAmount(requiredAmount)
                 .setDisplayName(plugin.getMessagesManager().getMessage("coin-exchange.item-name",
-                        Map.of("%material%", getMaterialDisplayName(material))))
+                        Map.of("%material%", getMaterialDisplayName(material, player.locale()))))
                 .setLore(lore)
                 .build();
     }
@@ -140,9 +138,8 @@ public class CoinExchangeGUI {
         inventory.setItem(45, instructionItem);
     }
 
-    private String getMaterialDisplayName(Material material) {
-        String name = material.name().toLowerCase().replace("_", " ");
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+    private String getMaterialDisplayName(Material material, Locale locale) {
+        return LanguageManager.translate(material.translationKey(), locale);
     }
 
     public void open() {
@@ -187,7 +184,7 @@ public class CoinExchangeGUI {
 
         if (playerAmount < requiredAmount) {
             Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%material%", getMaterialDisplayName(material));
+            placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
             placeholders.put("%required%", String.valueOf(requiredAmount));
             placeholders.put("%current%", String.valueOf(playerAmount));
 
@@ -211,7 +208,7 @@ public class CoinExchangeGUI {
         coinProvider.deposit(player, 1);
 
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%material%", getMaterialDisplayName(material));
+        placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
         placeholders.put("%amount%", String.valueOf(requiredAmount));
 
         plugin.getMessagesManager().sendMessage(player,

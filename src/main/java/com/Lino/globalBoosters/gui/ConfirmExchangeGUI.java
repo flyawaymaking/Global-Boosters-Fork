@@ -2,6 +2,7 @@ package com.Lino.globalBoosters.gui;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.listeners.BoosterItemListener;
+import com.Lino.globalBoosters.managers.LanguageManager;
 import com.Lino.globalBoosters.utils.ItemBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class ConfirmExchangeGUI {
@@ -44,7 +46,7 @@ public class ConfirmExchangeGUI {
         }
 
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%material%", getMaterialDisplayName(material));
+        placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
         placeholders.put("%amount%", String.valueOf(requiredAmount));
 
         ItemStack confirmItem = new ItemBuilder(Material.LIME_WOOL)
@@ -77,9 +79,8 @@ public class ConfirmExchangeGUI {
         inventory.setItem(15, cancelItem);
     }
 
-    private String getMaterialDisplayName(Material material) {
-        String name = material.name().toLowerCase().replace("_", " ");
-        return name.substring(0, 1).toUpperCase() + name.substring(1);
+    private String getMaterialDisplayName(Material material, Locale locale) {
+        return LanguageManager.translate(material.translationKey(), locale);
     }
 
     public void open() {

@@ -10,10 +10,7 @@ import com.Lino.globalBoosters.listeners.BoosterItemListener;
 import com.Lino.globalBoosters.listeners.EffectBoosterListener;
 import com.Lino.globalBoosters.listeners.FlyBoosterListener;
 import com.Lino.globalBoosters.listeners.GameEventListener;
-import com.Lino.globalBoosters.managers.BoosterManager;
-import com.Lino.globalBoosters.managers.BossBarManager;
-import com.Lino.globalBoosters.managers.EconomyManager;
-import com.Lino.globalBoosters.managers.SupplyManager;
+import com.Lino.globalBoosters.managers.*;
 import com.Lino.globalBoosters.tasks.BoosterTickTask;
 import com.Lino.globalBoosters.tasks.ScheduledBoosterTask;
 import com.Lino.globalBoosters.tasks.RandomScheduledBoosterTask;
@@ -58,6 +55,7 @@ public class GlobalBoosters extends JavaPlugin {
         registerCommands();
         registerListeners();
         startTasks();
+        LanguageManager.init(instance);
 
         getLogger().info("GlobalBoosters has been enabled!");
     }
