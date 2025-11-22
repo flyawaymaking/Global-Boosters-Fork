@@ -236,7 +236,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.stats.header") + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.stats.header") + "\n");
 
         ResultSet rs = plugin.getDataManager().getTopBoosters(10);
         if (rs != null) {
@@ -275,7 +275,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.stats.error"));
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.stats.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.stats.footer"));
 
         return true;
     }
@@ -286,10 +286,10 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.schedule.header") + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.schedule.header") + "\n");
 
         if (!plugin.getConfigManager().isScheduledBoostersEnabled()) {
-            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.disabled") + "\n\n");
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.disabled") + "\n");
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.footer"));
             return true;
         }
@@ -314,7 +314,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         placeholders.put("%time%", currentTime);
         placeholders.put("%day%", currentDay);
 
-        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.current-info", placeholders) + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.schedule.current-info", placeholders) + "\n");
 
 
         if (plugin.getConfigManager().getScheduledBoosters().isEmpty()) {
@@ -339,7 +339,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.schedule.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.schedule.footer"));
         return true;
     }
 
@@ -349,10 +349,10 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.random.header") + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.random.header") + "\n");
 
         if (!plugin.getConfigManager().isRandomScheduledEnabled()) {
-            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.disabled") + "\n\n");
+            plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.disabled") + "\n");
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.footer"));
             return true;
         }
@@ -362,7 +362,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         placeholders.put("%duration%", String.valueOf(plugin.getConfigManager().getRandomScheduledDuration()));
         placeholders.put("%activator%", plugin.getConfigManager().getRandomScheduledActivatorName());
 
-        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.info", placeholders) + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.info", placeholders) + "\n");
         plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.random.pool-header"));
 
         List<String> boosterPool = plugin.getConfigManager().getRandomScheduledBoosters();
@@ -376,7 +376,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.random.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.random.footer"));
         return true;
     }
 

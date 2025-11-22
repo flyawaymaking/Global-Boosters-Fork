@@ -36,13 +36,13 @@ public class GlobalBoostersCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendHelp(CommandSender sender) {
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.help.header") + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.help.header") + "\n");
         plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.boostshop"));
         plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.globalboosters-help"));
         plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.globalboosters-list"));
 
         if (sender.hasPermission("globalboosters.admin")) {
-            plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.help.admin-header"));
+            plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.help.admin-header"));
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-give"));
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-start"));
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-stop"));
@@ -51,7 +51,7 @@ public class GlobalBoostersCommand implements CommandExecutor, TabCompleter {
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.help.booster-schedule"));
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.help.available-boosters") + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.help.available-boosters") + "\n");
 
         for (BoosterType type : BoosterType.values()) {
             if (!plugin.getConfigManager().isBoosterEnabled(type)) {
@@ -68,11 +68,11 @@ public class GlobalBoostersCommand implements CommandExecutor, TabCompleter {
             plugin.getMessagesManager().sendMessage(sender, typeName + separator + boosterName + multiplier);
         }
 
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.help.footer"));
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.help.footer"));
     }
 
     private void sendActiveBoostersList(CommandSender sender) {
-        plugin.getMessagesManager().sendMessage(sender, "\n\n" + plugin.getMessagesManager().getMessage("commands.list.header") + "\n\n");
+        plugin.getMessagesManager().sendMessage(sender, "\n" + plugin.getMessagesManager().getMessage("commands.list.header") + "\n");
 
         if (plugin.getBoosterManager().getActiveBoosters().isEmpty()) {
             plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("commands.list.no-active"));
@@ -86,7 +86,7 @@ public class GlobalBoostersCommand implements CommandExecutor, TabCompleter {
                 placeholders.put("%time%", booster.getTimeRemaining());
 
                 plugin.getMessagesManager().sendMessage(sender, "  " + plugin.getMessagesManager().getMessage("commands.list.activated-by", placeholders));
-                plugin.getMessagesManager().sendMessage(sender, "  " + plugin.getMessagesManager().getMessage("commands.list.time-remaining", placeholders) + "\n\n");
+                plugin.getMessagesManager().sendMessage(sender, "  " + plugin.getMessagesManager().getMessage("commands.list.time-remaining", placeholders) + "\n");
             }
         }
 
