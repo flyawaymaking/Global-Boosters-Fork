@@ -5,6 +5,7 @@ import com.Lino.globalBoosters.boosters.BoosterType;
 import com.Lino.globalBoosters.config.ConfigManager;
 import com.Lino.globalBoosters.items.BoosterItem;
 import com.Lino.globalBoosters.gui.BoosterShopGUI;
+import com.Lino.globalBoosters.managers.LanguageManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -205,6 +206,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         plugin.getEconomyManager().reload();
         plugin.getMessagesManager().reload();
         plugin.reloadScheduledTask();
+        LanguageManager.init(plugin);
 
         plugin.getMessagesManager().sendMessage(sender, plugin.getMessagesManager().getMessage("general.reload-success"));
         return true;

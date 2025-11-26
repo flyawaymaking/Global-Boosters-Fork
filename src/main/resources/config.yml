@@ -1,3 +1,7 @@
+# format: language_COUNTRY
+# after changing this, the server will download the default item names
+language: en_US
+
 max_active_boosters: 3
 
 keep_effects_on_death: true
