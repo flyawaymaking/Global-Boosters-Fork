@@ -1,4 +1,4 @@
-# Global Boosters
+# GlobalBoosters-Fork
 
 Fork of the original [Global-Boosters](https://github.com/lino9999/Global-Boosters) plugin with additional features and improvements.
 

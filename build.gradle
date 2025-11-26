@@ -31,5 +31,5 @@ dependencies {
 }
 
 tasks.jar {
-    archiveBaseName.set("GlobalBoosters")
+    archiveBaseName.set("GlobalBoosters-Fork")
 }

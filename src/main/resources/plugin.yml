@@ -1,9 +1,10 @@
-name: GlobalBoosters
+name: GlobalBoosters-Fork
 version: '3.3.3'
 main: com.Lino.globalBoosters.GlobalBoosters
 api-version: '1.21'
 softdepend: [Vault, CoinsEngine]
-author: Lino
+author: Lino, golovin12
+website: https://github.com/flyawaymaking
 description: A comprehensive global boosters plugin for Minecraft servers
 
 commands:
