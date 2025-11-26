@@ -339,6 +339,10 @@ public class ConfigManager {
         return config.getDouble("economy.vault.price_multiplier", 1.0);
     }
 
+    public String getLanguage() {
+        return config.getString("language", "en_US");
+    }
+
     public boolean isCoinsEngineEnabled() {
         return config.getBoolean("economy.coins_engine.enabled", false);
     }

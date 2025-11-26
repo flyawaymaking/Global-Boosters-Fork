@@ -55,13 +55,13 @@ public class GlobalBoosters extends JavaPlugin {
         registerCommands();
         registerListeners();
         startTasks();
-        LanguageManager.init(instance);
 
         getLogger().info("GlobalBoosters has been enabled!");
     }
 
     private void initializeManagers() {
         configManager = new ConfigManager(this);
+        LanguageManager.init(instance);
         messagesManager = new MessagesManager(this);
         dataManager = new DataManager(this);
         economyManager = new EconomyManager(this);

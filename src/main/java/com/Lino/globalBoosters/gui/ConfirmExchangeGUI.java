@@ -46,7 +46,7 @@ public class ConfirmExchangeGUI {
         }
 
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
+        placeholders.put("%material%", getMaterialDisplayName(material));
         placeholders.put("%amount%", String.valueOf(requiredAmount));
 
         ItemStack confirmItem = new ItemBuilder(Material.LIME_WOOL)
@@ -79,8 +79,8 @@ public class ConfirmExchangeGUI {
         inventory.setItem(15, cancelItem);
     }
 
-    private String getMaterialDisplayName(Material material, Locale locale) {
-        return LanguageManager.translate(material.translationKey(), locale);
+    private String getMaterialDisplayName(Material material) {
+        return LanguageManager.translate(material);
     }
 
     public void open() {

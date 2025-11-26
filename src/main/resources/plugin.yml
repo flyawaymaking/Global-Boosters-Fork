@@ -1,5 +1,5 @@
 name: GlobalBoosters-Fork
-version: '3.3.3'
+version: '3.3.4'
 main: com.Lino.globalBoosters.GlobalBoosters
 api-version: '1.21'
 softdepend: [Vault, CoinsEngine]

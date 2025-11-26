@@ -73,7 +73,7 @@ public class CoinExchangeGUI {
 
     private ItemStack createExchangeItem(Material material, int requiredAmount) {
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
+        placeholders.put("%material%", getMaterialDisplayName(material));
         placeholders.put("%amount%", String.valueOf(requiredAmount));
 
         int playerAmount = countPlayerItems(material);
@@ -97,7 +97,7 @@ public class CoinExchangeGUI {
         return new ItemBuilder(displayMaterial)
                 .setAmount(requiredAmount)
                 .setDisplayName(plugin.getMessagesManager().getMessage("coin-exchange.item-name",
-                        Map.of("%material%", getMaterialDisplayName(material, player.locale()))))
+                        Map.of("%material%", getMaterialDisplayName(material))))
                 .setLore(lore)
                 .build();
     }
@@ -138,8 +138,8 @@ public class CoinExchangeGUI {
         inventory.setItem(45, instructionItem);
     }
 
-    private String getMaterialDisplayName(Material material, Locale locale) {
-        return LanguageManager.translate(material.translationKey(), locale);
+    private String getMaterialDisplayName(Material material) {
+        return LanguageManager.translate(material);
     }
 
     public void open() {
@@ -184,7 +184,7 @@ public class CoinExchangeGUI {
 
         if (playerAmount < requiredAmount) {
             Map<String, String> placeholders = new HashMap<>();
-            placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
+            placeholders.put("%material%", getMaterialDisplayName(material));
             placeholders.put("%required%", String.valueOf(requiredAmount));
             placeholders.put("%current%", String.valueOf(playerAmount));
 
@@ -208,7 +208,7 @@ public class CoinExchangeGUI {
         coinProvider.deposit(player, 1);
 
         Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%material%", getMaterialDisplayName(material, player.locale()));
+        placeholders.put("%material%", getMaterialDisplayName(material));
         placeholders.put("%amount%", String.valueOf(requiredAmount));
 
         plugin.getMessagesManager().sendMessage(player,
