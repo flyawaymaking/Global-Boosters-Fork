@@ -3,6 +3,7 @@ package com.Lino.globalBoosters.economy;
 import com.Lino.globalBoosters.GlobalBoosters;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.api.currency.Currency;
@@ -28,7 +29,15 @@ public class CoinsEngineProvider implements EconomyProvider {
             currency = CoinsEngineAPI.getCurrency(currencyId);
             assert currency != null;
             currencyName = currency.getName();
-            icon = currency.icon().getMaterial();
+            // icon = currency.icon().getMaterial();
+            Object nightItem = currency.getClass().getMethod("icon").invoke(currency);
+            Object materialObj = nightItem.getClass().getMethod("getMaterial").invoke(nightItem);
+
+            if (materialObj instanceof Material mat) {
+                icon = mat;
+            } else {
+                icon = Material.DIAMOND;
+            }
         } catch (Exception e) {
             currency = null;
         }

@@ -59,7 +59,7 @@ economy:
 ```
 
 ## Dependencies
-- Required: Paper 1.21.8
+- Required: Paper 1.21.10
 
 - Optional:
   1. Vault for traditional economy
