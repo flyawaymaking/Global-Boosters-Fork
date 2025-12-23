@@ -59,7 +59,8 @@ economy:
 ```
 
 ## Dependencies
-- Required: Paper 1.21.10
+- Required: Paper 1.21+
+- Java 21
 
 - Optional:
   1. Vault for traditional economy
