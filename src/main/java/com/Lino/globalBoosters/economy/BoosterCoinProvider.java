@@ -115,7 +115,7 @@ public class BoosterCoinProvider implements EconomyProvider {
             }
         }
 
-        return remainingToRemove == 0;
+        return true;
     }
 
     @Override

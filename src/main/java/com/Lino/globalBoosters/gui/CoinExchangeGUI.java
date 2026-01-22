@@ -239,7 +239,7 @@ public class CoinExchangeGUI {
                 int itemAmount = item.getAmount();
                 if (itemAmount <= amountToRemove) {
                     amountToRemove -= itemAmount;
-                    player.getInventory().removeItem(item);
+                    player.getInventory().removeItemAnySlot(item);
                 } else {
                     item.setAmount(itemAmount - amountToRemove);
                     amountToRemove = 0;
