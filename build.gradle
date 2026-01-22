@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.Lino.globalBoosters.GlobalBoosters'
-version = 'v3.3.5'
+version = 'v3.4.1'
 
 java {
     toolchain {
