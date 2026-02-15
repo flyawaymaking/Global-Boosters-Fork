@@ -6,10 +6,13 @@ import com.Lino.globalBoosters.commands.GlobalBoostersCommand;
 import com.Lino.globalBoosters.config.ConfigManager;
 import com.Lino.globalBoosters.config.MessagesManager;
 import com.Lino.globalBoosters.data.DataManager;
+import com.Lino.globalBoosters.data.BoosterLogger;
+import com.Lino.globalBoosters.hooks.BoosterPlaceholderExpansion;
 import com.Lino.globalBoosters.listeners.BoosterItemListener;
 import com.Lino.globalBoosters.listeners.EffectBoosterListener;
 import com.Lino.globalBoosters.listeners.FlyBoosterListener;
 import com.Lino.globalBoosters.listeners.GameEventListener;
+import com.Lino.globalBoosters.boosters.ActiveBooster;
 import com.Lino.globalBoosters.managers.BoosterManager;
 import com.Lino.globalBoosters.managers.BossBarManager;
 import com.Lino.globalBoosters.managers.SupplyManager;
@@ -38,6 +41,7 @@ public class GlobalBoosters extends JavaPlugin {
     private EffectBoosterListener effectBoosterListener;
     private FlyBoosterListener flyBoosterListener;
     private SupplyManager supplyManager;
+    private BoosterLogger boosterLogger;
     private BukkitTask scheduledBoosterTask;
     private BukkitTask randomScheduledBoosterTask;
 
@@ -45,10 +49,8 @@ public class GlobalBoosters extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // Load config first to check if we need Vault
         configManager = new ConfigManager(this);
 
-        // Only check for Vault if the shop GUI is enabled
         if (configManager.isShopGuiEnabled()) {
             if (!setupEconomy()) {
                 getLogger().severe("Vault dependency not found! Disabling plugin...");
@@ -61,6 +63,7 @@ public class GlobalBoosters extends JavaPlugin {
         registerCommands();
         registerListeners();
         startTasks();
+        registerHooks();
 
         getLogger().info("GlobalBoosters has been enabled!");
     }
@@ -91,6 +94,22 @@ public class GlobalBoosters extends JavaPlugin {
         }
 
         getLogger().info("GlobalBoosters has been disabled!");
+    }
+
+    public void performReload() {
+        reloadConfig();
+        configManager.reload();
+        messagesManager.reload();
+
+        bossBarManager.removeAllBossBars();
+
+        if (configManager.isBossBarEnabled()) {
+            for (ActiveBooster booster : boosterManager.getActiveBoosters()) {
+                bossBarManager.createBossBar(booster);
+            }
+        }
+
+        reloadScheduledTask();
     }
 
     private void cleanupAllEffects() {
@@ -134,13 +153,13 @@ public class GlobalBoosters extends JavaPlugin {
     }
 
     private void initializeManagers() {
-        // configManager is initialized in onEnable but re-initializing here ensures reload safety
         configManager = new ConfigManager(this);
         messagesManager = new MessagesManager(this);
         dataManager = new DataManager(this);
         boosterManager = new BoosterManager(this);
         bossBarManager = new BossBarManager(this);
         supplyManager = new SupplyManager(this);
+        boosterLogger = new BoosterLogger(this);
 
         dataManager.loadActiveBoosters();
     }
@@ -179,6 +198,13 @@ public class GlobalBoosters extends JavaPlugin {
 
         if (configManager.isRandomScheduledEnabled()) {
             randomScheduledBoosterTask = new RandomScheduledBoosterTask(this).runTaskTimer(this, 20L, 20L);
+        }
+    }
+
+    private void registerHooks() {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new BoosterPlaceholderExpansion(this).register();
+            getLogger().info("PlaceholderAPI hook registered successfully!");
         }
     }
 
@@ -256,5 +282,9 @@ public class GlobalBoosters extends JavaPlugin {
 
     public SupplyManager getSupplyManager() {
         return supplyManager;
+    }
+
+    public BoosterLogger getBoosterLogger() {
+        return boosterLogger;
     }
 }

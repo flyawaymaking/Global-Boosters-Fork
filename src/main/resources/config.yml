@@ -14,11 +14,30 @@ show_activator_name: true
 
 negative_effects_enabled: true
 
+# Enable or disable the BossBar display for active boosters.
+bossbar_enabled: true
+
+# Enable or disable the ActionBar display for active boosters.
+# Useful as a lightweight alternative when bossbar is disabled.
+actionbar_enabled: false
+
+# Enable or disable all plugin sounds globally.
+sounds_enabled: true
+
 # Control the volume of all plugin sounds. 1.0 is max, 0.0 is muted.
 sound_volume: 1.0
 
+# Log all booster activations, expirations and queues to logs/booster_history.txt.
+# Useful for admins to track usage and detect abuse.
+history_log_enabled: false
+
+# When enabled, if a booster type is already active, new activations
+# will be queued and auto-activate once the current one expires.
+# When disabled, duplicate activations are rejected.
+booster_queue_enabled: false
+
   # Examples: UTC, GMT, America/New_York, Europe/London, Europe/Rome,
-  # Asia/Tokyo, America/Los_Angeles, Australia/Sydney
+# Asia/Tokyo, America/Los_Angeles, Australia/Sydney
 # Full list: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 scheduled_boosters:
   enabled: true
@@ -89,145 +108,175 @@ random_scheduled_boosters:
     - KEEP_INVENTORY
     - FLY
 
+# Valid colors: PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
 boosters:
   plant_growth:
     enabled: true
     price: 500.0
     duration: 30
+    bossbar_color: GREEN
   spawner_rate:
     enabled: true
     price: 1500.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: RED
   exp_multiplier:
     enabled: true
     price: 1000.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: YELLOW
   mob_drop:
     enabled: true
     price: 1200.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: RED
   mining_speed:
     enabled: true
     price: 800.0
     duration: 30
     multiplier: 1.5
+    bossbar_color: BLUE
   fishing_luck:
     enabled: true
     price: 600.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: WHITE
   farming_fortune:
     enabled: true
     price: 700.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: GREEN
   combat_damage:
     enabled: true
     price: 2000.0
     duration: 30
     multiplier: 1.5
+    bossbar_color: PURPLE
   haste:
     enabled: true
     price: 1000.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: YELLOW
   resistance:
     enabled: true
     price: 1500.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: WHITE
   jump_boost:
     enabled: true
     price: 800.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: BLUE
   regeneration:
     enabled: true
     price: 2000.0
     duration: 30
     multiplier: 1.0
+    bossbar_color: PINK
   night_vision:
     enabled: true
     price: 600.0
     duration: 30
     multiplier: 1.0
+    bossbar_color: YELLOW
   fire_resistance:
     enabled: true
     price: 1200.0
     duration: 30
     multiplier: 1.0
+    bossbar_color: RED
   speed:
     enabled: true
     price: 1000.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: BLUE
   strength:
     enabled: true
     price: 2500.0
     duration: 30
     multiplier: 2.0
+    bossbar_color: PURPLE
   no_fall_damage:
     enabled: true
     price: 800.0
     duration: 30
+    bossbar_color: WHITE
   hunger_saver:
     enabled: true
     price: 600.0
     duration: 30
     multiplier: 0.5
+    bossbar_color: GREEN
   armor_durability:
     enabled: true
     price: 1200.0
     duration: 30
     multiplier: 0.5
+    bossbar_color: WHITE
   keep_inventory:
     enabled: true
     price: 3000.0
     duration: 30
+    bossbar_color: PURPLE
   fly:
     enabled: true
     price: 2500.0
     duration: 30
+    bossbar_color: BLUE
   slowness:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   mining_fatigue:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   weakness:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   poison:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   wither:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   blindness:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   hunger:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED
   nausea:
     enabled: true
     price: 10000.0
     duration: 1
     multiplier: 1.0
+    bossbar_color: RED

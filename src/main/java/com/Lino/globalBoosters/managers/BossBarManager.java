@@ -4,6 +4,8 @@ import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.ActiveBooster;
 import com.Lino.globalBoosters.boosters.BoosterType;
 import com.Lino.globalBoosters.utils.GradientColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class BossBarManager {
 
@@ -28,6 +31,10 @@ public class BossBarManager {
     }
 
     public void createBossBar(ActiveBooster booster) {
+        if (!plugin.getConfigManager().isBossBarEnabled()) {
+            return;
+        }
+
         if (booster.isExpired()) {
             return;
         }
@@ -54,11 +61,56 @@ public class BossBarManager {
             return;
         }
 
-        BossBar bossBar = bossBars.get(booster.getType());
-        if (bossBar != null) {
-            bossBar.setTitle(formatBossBarTitle(booster));
-            bossBar.setProgress(Math.max(0, Math.min(1, booster.getProgress())));
+        if (plugin.getConfigManager().isBossBarEnabled()) {
+            BossBar bossBar = bossBars.get(booster.getType());
+            if (bossBar != null) {
+                bossBar.setTitle(formatBossBarTitle(booster));
+                bossBar.setProgress(Math.max(0, Math.min(1, booster.getProgress())));
+            }
         }
+    }
+
+    public void sendActionBarUpdate() {
+        if (!plugin.getConfigManager().isActionBarEnabled()) {
+            return;
+        }
+
+        java.util.Collection<ActiveBooster> activeBoosters = plugin.getBoosterManager().getActiveBoosters();
+        if (activeBoosters.isEmpty()) {
+            return;
+        }
+
+        String actionBarText = buildActionBarText(activeBoosters);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(actionBarText));
+        }
+    }
+
+    private String buildActionBarText(java.util.Collection<ActiveBooster> boosters) {
+        if (boosters.size() == 1) {
+            ActiveBooster booster = boosters.iterator().next();
+            return formatActionBarTitle(booster);
+        }
+
+        return boosters.stream()
+                .map(this::formatActionBarTitle)
+                .collect(Collectors.joining(GradientColor.apply(" <gradient:#808080:#A9A9A9>&l|</gradient> ")));
+    }
+
+    private String formatActionBarTitle(ActiveBooster booster) {
+        Map<String, String> placeholders = new HashMap<>();
+
+        String boosterNameRaw = plugin.getMessagesManager().getRawMessage("booster-names." + booster.getType().name().toLowerCase());
+        if (boosterNameRaw == null) {
+            boosterNameRaw = "<gradient:#FFD700:#FFA500>" + booster.getType().getDisplayName() + "</gradient>";
+        }
+
+        placeholders.put("%booster%", boosterNameRaw);
+        placeholders.put("%time%", booster.getTimeRemaining());
+        placeholders.put("%player%", booster.getActivatorName());
+
+        return plugin.getMessagesManager().getMessage("actionbar.format", placeholders);
     }
 
     public void removeBossBar(BoosterType type) {
@@ -78,6 +130,10 @@ public class BossBarManager {
     }
 
     public void addPlayerToBossBars(Player player) {
+        if (!plugin.getConfigManager().isBossBarEnabled()) {
+            return;
+        }
+
         for (BossBar bossBar : bossBars.values()) {
             bossBar.addPlayer(player);
         }
@@ -130,6 +186,11 @@ public class BossBarManager {
     }
 
     private BarColor getBarColor(BoosterType type) {
+        BarColor configColor = plugin.getConfigManager().getBoosterBossBarColor(type);
+        if (configColor != null) {
+            return configColor;
+        }
+
         if (type.isNegativeEffect()) {
             return BarColor.RED;
         }

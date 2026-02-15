@@ -32,7 +32,23 @@ public class GlobalBoostersCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("reload")) {
+            return handleReload(sender);
+        }
+
         sendHelp(sender);
+        return true;
+    }
+
+    private boolean handleReload(CommandSender sender) {
+        if (!sender.hasPermission("globalboosters.admin.reload")) {
+            sender.sendMessage(plugin.getMessagesManager().getMessage("general.no-permission"));
+            return true;
+        }
+
+        plugin.performReload();
+
+        sender.sendMessage(plugin.getMessagesManager().getMessage("general.reload-success"));
         return true;
     }
 
@@ -118,7 +134,10 @@ public class GlobalBoostersCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("help", "list");
+            List<String> subCommands = new ArrayList<>(Arrays.asList("help", "list"));
+            if (sender.hasPermission("globalboosters.admin.reload")) {
+                subCommands.add("reload");
+            }
             return filterStartingWith(subCommands, args[0]);
         }
         return new ArrayList<>();

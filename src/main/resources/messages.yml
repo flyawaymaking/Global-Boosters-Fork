@@ -81,6 +81,8 @@ booster:
   activated: "%prefix%<gradient:#00CED1:#1E90FF>&l%player%</gradient> <gradient:#808080:#A9A9A9>&lactivated</gradient> %booster% <gradient:#808080:#A9A9A9>&lfor</gradient> <gradient:#32CD32:#00FF00>&l%duration% minutes</gradient><gradient:#808080:#A9A9A9>&l!</gradient>"
   activated-scheduled: "<gradient:#9370DB:#8B008B>&lScheduled activation:</gradient> %booster% <gradient:#808080:#A9A9A9>&lfor</gradient> <gradient:#32CD32:#00FF00>&l%duration% minutes</gradient><gradient:#808080:#A9A9A9>&l!</gradient>"
   activated-random: "<gradient:#9370DB:#8B008B>&lRandom booster activated:</gradient> %booster% <gradient:#808080:#A9A9A9>&lfor</gradient> <gradient:#32CD32:#00FF00>&l%duration% minutes</gradient><gradient:#808080:#A9A9A9>&l!</gradient>"
+  queue-remaining: "<gradient:#808080:#A9A9A9>&l➤</gradient> <gradient:#FFA500:#FFD700>&l%count% more %booster% in queue</gradient>"
+  queued: "<gradient:#FFA500:#FFD700>&l⏳ %booster% has been queued! Position: #%position%</gradient>"
   expired: "%prefix%%booster% <gradient:#FF6347:#FF0000>&lhas expired!</gradient>"
   item-name: "<gradient:#FFD700:#FF8C00>&l★ %booster% &l★</gradient>"
   item-lore:
@@ -185,3 +187,6 @@ effects:
   blindness: "<gradient:#808080:#A9A9A9>&l•</gradient> <gradient:#FFFFFF:#F0F0F0>&lBlinds all players</gradient> <gradient:#1C1C1C:#000000>&l⚠</gradient>"
   hunger: "<gradient:#808080:#A9A9A9>&l•</gradient> <gradient:#FFFFFF:#F0F0F0>&lIncreases hunger for all</gradient> <gradient:#D2691E:#8B4513>&l⚠</gradient>"
   nausea: "<gradient:#808080:#A9A9A9>&l•</gradient> <gradient:#FFFFFF:#F0F0F0>&lCauses nausea for all</gradient> <gradient:#9370DB:#4B0082>&l⚠</gradient>"
+
+actionbar:
+  format: "%booster% <gradient:#808080:#A9A9A9>&l-</gradient> <gradient:#00FF00:#32CD32>&l%time%</gradient>"

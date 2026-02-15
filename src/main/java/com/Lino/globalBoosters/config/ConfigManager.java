@@ -2,6 +2,7 @@ package com.Lino.globalBoosters.config;
 
 import com.Lino.globalBoosters.GlobalBoosters;
 import com.Lino.globalBoosters.boosters.BoosterType;
+import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -15,6 +16,7 @@ public class ConfigManager {
     private final Map<BoosterType, Integer> boosterDurations;
     private final Map<BoosterType, Double> boosterMultipliers;
     private final Map<BoosterType, Boolean> boosterEnabled;
+    private final Map<BoosterType, BarColor> boosterBossBarColors;
     private final List<ScheduledBooster> scheduledBoosters;
     private int maxActiveBoosters;
     private boolean limitedSupplyEnabled;
@@ -26,12 +28,17 @@ public class ConfigManager {
     private boolean shopGuiEnabled;
     private boolean showActivatorName;
     private boolean negativeEffectsEnabled;
+    private boolean bossBarEnabled;
+    private boolean actionBarEnabled;
+    private boolean soundsEnabled;
     private boolean randomScheduledEnabled;
     private int randomScheduledInterval;
     private int randomScheduledDuration;
     private String randomScheduledActivatorName;
     private List<String> randomScheduledBoosters;
     private double soundVolume;
+    private boolean historyLogEnabled;
+    private boolean queueEnabled;
 
     public ConfigManager(GlobalBoosters plugin) {
         this.plugin = plugin;
@@ -39,6 +46,7 @@ public class ConfigManager {
         this.boosterDurations = new HashMap<>();
         this.boosterMultipliers = new HashMap<>();
         this.boosterEnabled = new HashMap<>();
+        this.boosterBossBarColors = new HashMap<>();
         this.scheduledBoosters = new ArrayList<>();
         this.randomScheduledBoosters = new ArrayList<>();
 
@@ -57,7 +65,12 @@ public class ConfigManager {
         shopGuiEnabled = config.getBoolean("shop_gui_enabled", true);
         showActivatorName = config.getBoolean("show_activator_name", true);
         negativeEffectsEnabled = config.getBoolean("negative_effects_enabled", true);
+        bossBarEnabled = config.getBoolean("bossbar_enabled", true);
+        actionBarEnabled = config.getBoolean("actionbar_enabled", false);
+        soundsEnabled = config.getBoolean("sounds_enabled", true);
         soundVolume = config.getDouble("sound_volume", 1.0);
+        historyLogEnabled = config.getBoolean("history_log_enabled", false);
+        queueEnabled = config.getBoolean("booster_queue_enabled", false);
 
         scheduledBoostersEnabled = config.getBoolean("scheduled_boosters.enabled", false);
         scheduledBoostersTimezone = config.getString("scheduled_boosters.timezone", "UTC");
@@ -79,8 +92,7 @@ public class ConfigManager {
         }
 
         for (BoosterType type : BoosterType.values()) {
-            String path = "boosters."
-                    + type.name().toLowerCase();
+            String path = "boosters." + type.name().toLowerCase();
 
             if (!config.contains(path + ".enabled")) {
                 config.set(path + ".enabled", true);
@@ -106,6 +118,15 @@ public class ConfigManager {
                     config.set(path + ".multiplier", type.getDefaultMultiplier());
                 }
                 boosterMultipliers.put(type, config.getDouble(path + ".multiplier"));
+            }
+
+            String colorStr = config.getString(path + ".bossbar_color", null);
+            if (colorStr != null) {
+                try {
+                    boosterBossBarColors.put(type, BarColor.valueOf(colorStr.toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().warning("Invalid bossbar_color for " + type.name() + ": " + colorStr);
+                }
             }
         }
 
@@ -221,6 +242,22 @@ public class ConfigManager {
         return negativeEffectsEnabled;
     }
 
+    public boolean isBossBarEnabled() {
+        return bossBarEnabled;
+    }
+
+    public boolean isActionBarEnabled() {
+        return actionBarEnabled;
+    }
+
+    public boolean isSoundsEnabled() {
+        return soundsEnabled;
+    }
+
+    public BarColor getBoosterBossBarColor(BoosterType type) {
+        return boosterBossBarColors.getOrDefault(type, null);
+    }
+
     public boolean isRandomScheduledEnabled() {
         return randomScheduledEnabled;
     }
@@ -242,7 +279,18 @@ public class ConfigManager {
     }
 
     public double getSoundVolume() {
+        if (!soundsEnabled) {
+            return 0;
+        }
         return soundVolume;
+    }
+
+    public boolean isHistoryLogEnabled() {
+        return historyLogEnabled;
+    }
+
+    public boolean isQueueEnabled() {
+        return queueEnabled;
     }
 
     private boolean isNoMultiplierBooster(BoosterType type) {
@@ -262,6 +310,7 @@ public class ConfigManager {
         boosterDurations.clear();
         boosterMultipliers.clear();
         boosterEnabled.clear();
+        boosterBossBarColors.clear();
         scheduledBoosters.clear();
         randomScheduledBoosters.clear();
         loadConfig();

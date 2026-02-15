@@ -208,10 +208,7 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        plugin.reloadConfig();
-        plugin.getConfigManager().reload();
-        plugin.getMessagesManager().reload();
-        plugin.reloadScheduledTask();
+        plugin.performReload();
 
         sender.sendMessage(plugin.getMessagesManager().getMessage("general.reload-success"));
         return true;
@@ -321,34 +318,30 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
         ZonedDateTime zonedNow = ZonedDateTime.now(timezone);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         String currentTime = zonedNow.format(formatter);
-        String currentDay = zonedNow.getDayOfWeek().toString();
+        String currentDay = zonedNow.getDayOfWeek().name();
 
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%timezone%", timezoneStr);
-        placeholders.put("%time%", currentTime);
-        placeholders.put("%day%", currentDay);
-
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.current-info", placeholders));
+        Map<String, String> infoPlaceholders = new HashMap<>();
+        infoPlaceholders.put("%timezone%", timezoneStr);
+        infoPlaceholders.put("%time%", currentTime);
+        infoPlaceholders.put("%day%", currentDay);
+        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.current-info", infoPlaceholders));
         sender.sendMessage("");
 
-        if (plugin.getConfigManager().getScheduledBoosters().isEmpty()) {
+        List<ConfigManager.ScheduledBooster> schedules = plugin.getConfigManager().getScheduledBoosters();
+        if (schedules.isEmpty()) {
             sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.no-schedules"));
         } else {
             sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.list-header"));
-            for (ConfigManager.ScheduledBooster schedule : plugin.getConfigManager().getScheduledBoosters()) {
-                placeholders.clear();
+            sender.sendMessage("");
+            for (ConfigManager.ScheduledBooster schedule : schedules) {
+                Map<String, String> placeholders = new HashMap<>();
                 placeholders.put("%booster%", plugin.getMessagesManager().getBoosterNameRaw(schedule.getType()));
                 placeholders.put("%hour%", String.format("%02d", schedule.getHour()));
                 placeholders.put("%minute%", String.format("%02d", schedule.getMinute()));
                 placeholders.put("%duration%", String.valueOf(schedule.getDuration()));
-
-                StringBuilder daysStr = new StringBuilder();
-                for (DayOfWeek day : schedule.getDays()) {
-                    if (daysStr.length() > 0) daysStr.append(", ");
-                    daysStr.append(day.toString().substring(0, 3));
-                }
-                placeholders.put("%days%", daysStr.toString());
-
+                placeholders.put("%days%", schedule.getDays().stream()
+                        .map(DayOfWeek::name)
+                        .collect(Collectors.joining(", ")));
                 sender.sendMessage(plugin.getMessagesManager().getMessage("commands.schedule.entry", placeholders));
             }
         }
@@ -375,25 +368,20 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        Map<String, String> placeholders = new HashMap<>();
-        placeholders.put("%interval%", String.valueOf(plugin.getConfigManager().getRandomScheduledInterval()));
-        placeholders.put("%duration%", String.valueOf(plugin.getConfigManager().getRandomScheduledDuration()));
-        placeholders.put("%activator%", plugin.getConfigManager().getRandomScheduledActivatorName());
-
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.info", placeholders));
+        Map<String, String> infoPlaceholders = new HashMap<>();
+        infoPlaceholders.put("%interval%", String.valueOf(plugin.getConfigManager().getRandomScheduledInterval()));
+        infoPlaceholders.put("%duration%", String.valueOf(plugin.getConfigManager().getRandomScheduledDuration()));
+        infoPlaceholders.put("%activator%", plugin.getConfigManager().getRandomScheduledActivatorName());
+        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.info", infoPlaceholders));
         sender.sendMessage("");
-        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.pool-header"));
 
-        List<String> boosterPool = plugin.getConfigManager().getRandomScheduledBoosters();
-        for (String boosterName : boosterPool) {
+        sender.sendMessage(plugin.getMessagesManager().getMessage("commands.random.pool-header"));
+        for (String boosterName : plugin.getConfigManager().getRandomScheduledBoosters()) {
             try {
                 BoosterType type = BoosterType.valueOf(boosterName.toUpperCase());
-                if (plugin.getConfigManager().isBoosterEnabled(type)) {
-                    String name = plugin.getMessagesManager().getBoosterNameRaw(type);
-                    sender.sendMessage(GradientColor.apply("<gradient:#808080:#A9A9A9>• </gradient>") + plugin.getMessagesManager().getBoosterName(type));
-                }
+                sender.sendMessage(GradientColor.apply("<gradient:#808080:#A9A9A9>- </gradient>") + plugin.getMessagesManager().getBoosterName(type));
             } catch (IllegalArgumentException e) {
-                continue;
+                sender.sendMessage(GradientColor.apply("<gradient:#808080:#A9A9A9>- </gradient><gradient:#FF0000:#FF6B6B>" + boosterName + " (invalid)</gradient>"));
             }
         }
 
@@ -447,47 +435,32 @@ public class BoosterCommand implements CommandExecutor, TabCompleter {
             return filterStartingWith(subCommands, args[0]);
         }
 
-        if (args[0].equalsIgnoreCase("give") && sender.hasPermission("globalboosters.admin.give")) {
-            if (args.length == 2) {
-                return filterStartingWith(Bukkit.getOnlinePlayers().stream()
-                        .map(Player::getName)
-                        .collect(Collectors.toList()), args[1]);
-            } else if (args.length == 3) {
-                return getEnabledBoosters(args[2]);
-            } else if (args.length == 4) {
-                return Arrays.asList("30", "60", "120");
+        if (args.length == 2) {
+            if (args[0].equalsIgnoreCase("give")) {
+                return null;
+            }
+            if (args[0].equalsIgnoreCase("start") || args[0].equalsIgnoreCase("stop")) {
+                List<String> types = new ArrayList<>();
+                for (BoosterType type : BoosterType.values()) {
+                    if (plugin.getConfigManager().isBoosterEnabled(type)) {
+                        types.add(type.name().toLowerCase());
+                    }
+                }
+                return filterStartingWith(types, args[1]);
             }
         }
 
-        if (args[0].equalsIgnoreCase("start") && sender.hasPermission("globalboosters.admin")) {
-            if (args.length == 2) {
-                return getEnabledBoosters(args[1]);
-            } else if (args.length == 3) {
-                return Arrays.asList("30", "60", "120");
-            } else if (args.length == 4) {
-                return Collections.singletonList("Console");
+        if (args.length == 3 && args[0].equalsIgnoreCase("give")) {
+            List<String> types = new ArrayList<>();
+            for (BoosterType type : BoosterType.values()) {
+                if (plugin.getConfigManager().isBoosterEnabled(type)) {
+                    types.add(type.name().toLowerCase());
+                }
             }
-        }
-
-        if (args[0].equalsIgnoreCase("stop") && sender.hasPermission("globalboosters.admin")) {
-            if (args.length == 2) {
-                return filterStartingWith(plugin.getBoosterManager().getActiveBoosters().stream()
-                        .map(b -> b.getType().name().toLowerCase())
-                        .collect(Collectors.toList()), args[1]);
-            }
+            return filterStartingWith(types, args[2]);
         }
 
         return new ArrayList<>();
-    }
-
-    private List<String> getEnabledBoosters(String prefix) {
-        List<String> enabledBoosters = new ArrayList<>();
-        for (BoosterType type : BoosterType.values()) {
-            if (plugin.getConfigManager().isBoosterEnabled(type)) {
-                enabledBoosters.add(type.name().toLowerCase());
-            }
-        }
-        return filterStartingWith(enabledBoosters, prefix);
     }
 
     private List<String> filterStartingWith(List<String> list, String prefix) {

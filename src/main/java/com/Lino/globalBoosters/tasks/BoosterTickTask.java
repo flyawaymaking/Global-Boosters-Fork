@@ -18,6 +18,8 @@ public class BoosterTickTask extends BukkitRunnable {
     public void run() {
         plugin.getBoosterManager().tickAllBoosters();
 
+        plugin.getBossBarManager().sendActionBarUpdate();
+
         updateCounter++;
         if (updateCounter >= 10) {
             updateCounter = 0;
