@@ -1,5 +1,8 @@
 # GlobalBoosters-Fork
 
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/global-boosters-fork?logo=modrinth&label=downloads&color=1bd96a)](https://modrinth.com/plugin/global-boosters-fork)
+[![Modrinth Followers](https://img.shields.io/modrinth/followers/global-boosters-fork?logo=modrinth&label=followers&color=1bd96a)](https://modrinth.com/plugin/global-boosters-fork)
+
 Fork of the original [Global-Boosters](https://github.com/lino9999/Global-Boosters) plugin with additional features and improvements.
 
 ## 🚀 New Features
